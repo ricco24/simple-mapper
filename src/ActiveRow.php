@@ -161,7 +161,8 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
      */
     protected function getReference($key, $recordClass, $throughColumn = null)
     {
-        return new $recordClass($this->record->ref($key, $throughColumn));
+        $row = $this->record->ref($key, $throughColumn);
+        return $row instanceof IRow ? new $recordClass($row) : $row;
     }
 
     /**
