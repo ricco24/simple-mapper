@@ -85,6 +85,16 @@ class ActiveRowTest extends TestBase
         }
     }
 
+    public function testSortedRelated()
+    {
+        $product = $this->getProduct(2);
+        $categories = $product->getSortedCategories();
+
+        $this->assertCount(2, $categories);
+        $this->assertTrue(isset($categories[3]));
+        $this->assertTrue(isset($categories[4]));
+    }
+
     private function getProduct($id)
     {
         $p = DatabaseConnection::getContext()->table('products')->wherePrimary($id)->fetch();

@@ -27,6 +27,7 @@ create table products_product_categories(
   id int not null primary key auto_increment,
   product_id int not null,
   product_category_id int not null,
+  sorting int not null,
 
   foreign key (product_id) references products(id) on update cascade on delete cascade,
   foreign key (product_category_id) references product_categories(id) on update cascade on delete cascade

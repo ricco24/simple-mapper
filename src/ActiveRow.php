@@ -6,20 +6,12 @@ use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
 use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
+use Nette\Database\Table\IRow;
 
 class ActiveRow implements ArrayAccess, IteratorAggregate
 {
     /** @var NetteDatabaseActiveRow */
     protected $record;
-
-    /** @var array          Cache for referenced columns data */
-    protected $referenceCache = [];
-
-    /** @var array          Cache for related columns data */
-    protected $relatedCache = [];
-
-    /** @var array          Cache for mm related columns data */
-    protected $relatedMMCache = [];
 
     /**
      * @param NetteDatabaseActiveRow $record
@@ -169,11 +161,7 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
      */
     protected function getReference($key, $recordClass, $throughColumn = null)
     {
-        if (!array_key_exists($key, $this->referenceCache)) {
-            $reference = $this->record->ref($key, $throughColumn);
-            $this->referenceCache[$key] = new $recordClass($reference);
-        }
-        return $this->referenceCache[$key];
+        return new $recordClass($this->record->ref($key, $throughColumn));
     }
 
     /**
@@ -184,11 +172,7 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
      */
     protected function getRelated($key, $selectionClass, $throughColumn = null)
     {
-        if (!array_key_exists($key, $this->relatedCache)) {
-            $selection = $this->record->related($key, $throughColumn);
-            $this->relatedCache[$key] = new $selectionClass($selection);
-        }
-        return $this->relatedCache[$key];
+        return new $selectionClass($this->record->related($key, $throughColumn));
     }
 
     /**
@@ -196,17 +180,24 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
      * @param string $foreignName
      * @param string $recordClass
      * @param null|string $throughColumn
-     * @return mixed
+     * @return array
      */
     protected function getMMRelated($key, $foreignName, $recordClass, $throughColumn = null)
     {
-        $cacheKey = $key . '-' . $foreignName;
-        if (!array_key_exists($cacheKey, $this->relatedMMCache)) {
-            $this->relatedMMCache[$cacheKey] = [];
-            foreach ($this->record->related($key, $throughColumn) as $row) {
-                $this->relatedMMCache[$cacheKey][] = new $recordClass($row->$foreignName);
-            }
+        $result = [];
+        foreach ($this->record->related($key, $throughColumn) as $row) {
+            $result[] = new $recordClass($row->$foreignName);
         }
-        return $this->relatedMMCache[$cacheKey];
+        return $result;
+    }
+
+    /**
+     * @param IRow $row
+     * @param string $recordClass
+     * @return mixed
+     */
+    protected function prepareRecord(IRow $row, $recordClass)
+    {
+        return new $recordClass($row);
     }
 }

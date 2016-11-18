@@ -7,5 +7,6 @@ use SimpleMapper\Selection;
 
 class ProductCategories extends Selection
 {
+    /** @var string */
     protected $recordClass = ProductCategory::class;
 }

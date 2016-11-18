@@ -34,17 +34,17 @@ class BaseData
     ];
 
     public static $productsProductCategories = [
-        1 => ['id' => 1, 'product_id' => 1, 'product_category_id' => 1],
-        2 => ['id' => 2, 'product_id' => 1, 'product_category_id' => 2],
-        3 => ['id' => 3, 'product_id' => 2, 'product_category_id' => 3],
-        4 => ['id' => 4, 'product_id' => 2, 'product_category_id' => 4],
-        5 => ['id' => 5, 'product_id' => 3, 'product_category_id' => 5],
-        6 => ['id' => 6, 'product_id' => 3, 'product_category_id' => 6],
-        7 => ['id' => 7, 'product_id' => 4, 'product_category_id' => 7],
-        8 => ['id' => 8, 'product_id' => 5, 'product_category_id' => 1],
-        9 => ['id' => 9, 'product_id' => 6, 'product_category_id' => 2],
-        10 => ['id' => 10, 'product_id' => 7, 'product_category_id' => 3],
-        11 => ['id' => 11, 'product_id' => 8, 'product_category_id' => 4],
-        12 => ['id' => 12, 'product_id' => 9, 'product_category_id' => 5],
+        1 => ['id' => 1, 'product_id' => 1, 'product_category_id' => 1, 'sorting' => 10],
+        2 => ['id' => 2, 'product_id' => 1, 'product_category_id' => 2, 'sorting' => 9],
+        3 => ['id' => 3, 'product_id' => 2, 'product_category_id' => 3, 'sorting' => 8],
+        4 => ['id' => 4, 'product_id' => 2, 'product_category_id' => 4, 'sorting' => 7],
+        5 => ['id' => 5, 'product_id' => 3, 'product_category_id' => 5, 'sorting' => 6],
+        6 => ['id' => 6, 'product_id' => 3, 'product_category_id' => 6, 'sorting' => 5],
+        7 => ['id' => 7, 'product_id' => 4, 'product_category_id' => 7, 'sorting' => 4],
+        8 => ['id' => 8, 'product_id' => 5, 'product_category_id' => 1, 'sorting' => 3],
+        9 => ['id' => 9, 'product_id' => 6, 'product_category_id' => 2, 'sorting' => 2],
+        10 => ['id' => 10, 'product_id' => 7, 'product_category_id' => 3, 'sorting' => 1],
+        11 => ['id' => 11, 'product_id' => 8, 'product_category_id' => 4, 'sorting' => 11],
+        12 => ['id' => 12, 'product_id' => 9, 'product_category_id' => 5, 'sorting' => 15],
     ];
 }

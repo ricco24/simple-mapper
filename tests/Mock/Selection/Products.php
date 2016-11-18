@@ -7,8 +7,13 @@ use SimpleMapper\Selection;
 
 class Products extends Selection
 {
+    /** @var string */
     protected $recordClass = Product::class;
 
+    /**
+     * Fetch only active products
+     * @return Products
+     */
     public function active()
     {
         $this->getSelection()->where([
@@ -18,6 +23,10 @@ class Products extends Selection
         return $this;
     }
 
+    /**
+     * Fetch only products visible for admins
+     * @return Products
+     */
     public function forAdmin()
     {
         $this->getSelection()->where([
