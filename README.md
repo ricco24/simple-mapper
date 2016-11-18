@@ -1,1 +1,3 @@
-# simple-mapper
+# Simple mapper
+
+Simple ORM for NetteDatabase.

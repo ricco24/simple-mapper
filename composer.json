@@ -1,0 +1,23 @@
+{
+    "name": "kelemen/simple-mapper",
+    "type": "library",
+    "description": "Simple ORM mapper for Nette Database",
+    "keywords": ["mapper", "nette-database", "orm"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Samuel Kelemen"
+        }
+    ],
+    "require": {
+        "php": ">=5.5",
+        "nette/database": "~2.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.3",
+        "squizlabs/php_codesniffer": "^2.6"
+    },
+    "autoload": {
+        "classmap": ["src/"] 
+    }
+}
