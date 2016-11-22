@@ -4,11 +4,7 @@ namespace Kelemen\SimpleMapper\Tests;
 
 require_once 'TestBase.php';
 
-use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\Product;
-use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\ProductCategory;
-use Kelemen\SimpleMapper\Tests\Mock\Selection\Products;
 use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\ProductType;
-use DatabaseConnection;
 use BaseData;
 use Nette\DeprecatedException;
 
@@ -16,9 +12,7 @@ class ActiveRowTest extends TestBase
 {
     public function testReference()
     {
-        $selection = DatabaseConnection::getContext()->table('products');
-        $products = new Products($selection);
-
+        $products = $this->getProducts();
         foreach ($products as $product) {
             $this->assertInstanceOf(ProductType::class, $product->getType());
         }
@@ -26,19 +20,31 @@ class ActiveRowTest extends TestBase
 
     public function testMMRelated()
     {
-        $selection = DatabaseConnection::getContext()->table('products')->wherePrimary(1);
-        $products = new Products($selection);
+        $product = $this->getProduct(2);
+        $categories = $product->getCategories();
 
-        foreach ($products as $product) {
-            $categories = $product->getCategories();
-            $this->assertInternalType('array', $categories);
+        $this->assertCount(2, $categories);
 
-            $i = 1;
-            foreach ($categories as $category) {
-                $this->assertInstanceOf(ProductCategory::class, $category);
-                $this->assertEquals('Category ' . $i, $category->title);
-                $i++;
-            }
+        $i = 3;
+        foreach ($categories as $category) {
+            $this->assertEquals('Category ' . $i, $category->title);
+            $i++;
+        }
+    }
+
+    public function testSortedRelated()
+    {
+        $product = $this->getProduct(2);
+        $categories = $product->getSortedCategories();
+
+        $this->assertCount(2, $categories);
+        $this->assertTrue(isset($categories[3]));
+        $this->assertTrue(isset($categories[4]));
+
+        $i = 4;
+        foreach ($categories as $category) {
+            $this->assertEquals('Category ' . $i, $category->title);
+            $i--;
         }
     }
 
@@ -83,21 +89,5 @@ class ActiveRowTest extends TestBase
         foreach ($product as $key => $value) {
             $this->assertEquals(BaseData::$products[$productId][$key], $value);
         }
-    }
-
-    public function testSortedRelated()
-    {
-        $product = $this->getProduct(2);
-        $categories = $product->getSortedCategories();
-
-        $this->assertCount(2, $categories);
-        $this->assertTrue(isset($categories[3]));
-        $this->assertTrue(isset($categories[4]));
-    }
-
-    private function getProduct($id)
-    {
-        $p = DatabaseConnection::getContext()->table('products')->wherePrimary($id)->fetch();
-        return new Product($p);
     }
 }

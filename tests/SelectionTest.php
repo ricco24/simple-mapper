@@ -14,9 +14,7 @@ class SelectionTest extends TestBase
 {
     public function testFetchAll()
     {
-        $selection = DatabaseConnection::getContext()->table('products');
-        $products = new Products($selection);
-
+        $products = $this->getProducts();
         $this->assertInstanceOf(Products::class, $products);
         foreach ($products->fetchAll() as $product) {
             $this->assertInstanceOf(Product::class, $product);
@@ -25,9 +23,7 @@ class SelectionTest extends TestBase
 
     public function testAdvancedFetchAllAndCount()
     {
-        $selection = DatabaseConnection::getContext()->table('products')->where('type.id', 3);
-        $products = new Products($selection);
-
+        $products = $this->getProducts(['type.id' => 3]);
         $this->assertInstanceOf(Products::class, $products);
         foreach ($products->fetchAll() as $product) {
             $this->assertInstanceOf(Product::class, $product);
@@ -39,41 +35,33 @@ class SelectionTest extends TestBase
     public function testGet()
     {
         $productId = 7;
-        $selection = DatabaseConnection::getContext()->table('products');
-        $products = new Products($selection);
+        $products = $this->getProducts();
         $product = $products->get($productId);
-
         $this->assertEquals(BaseData::$products[$productId], $product->toArray());
     }
 
     public function testFetch()
     {
         $productId = 4;
-        $selection = DatabaseConnection::getContext()->table('products')->where('id', $productId);
-        $products = new Products($selection);
+        $products = $this->getProducts(['id' => $productId]);
         $product = $products->fetch();
-
         $this->assertEquals(BaseData::$products[$productId], $product->toArray());
     }
 
     public function testFetchField()
     {
         $productId = 3;
-        $selection = DatabaseConnection::getContext()->table('products')->where('id', $productId);
-        $products = new Products($selection);
+        $products = $this->getProducts(['id' => $productId]);
         $productTitle = $products->fetchField('title');
-
         $this->assertEquals(BaseData::$products[$productId]['title'], $productTitle);
     }
 
     public function testFetchPairs()
     {
-        $selection = DatabaseConnection::getContext()->table('products');
-        $products = new Products($selection);
-
+        $products = $this->getProducts();
         $pairs = $products->fetchPairs(null, 'id');
-        $this->assertEquals(array_column(BaseData::$products, 'id'), $pairs);
 
+        $this->assertEquals(array_column(BaseData::$products, 'id'), $pairs);
         foreach ($products->fetchPairs('id') as $row) {
             $this->assertInstanceOf(Product::class, $row);
         }
@@ -81,26 +69,20 @@ class SelectionTest extends TestBase
 
     public function testFetchAssoc()
     {
-        $selection = DatabaseConnection::getContext()->table('products');
-        $products = new Products($selection);
-
+        $products = $this->getProducts();
         $this->assertEquals(array_column(BaseData::$products, 'title'), $products->fetchAssoc('[]=title'));
     }
 
     public function testCountable()
     {
-        $selection = DatabaseConnection::getContext()->table('products');
-        $products = new Products($selection);
-
+        $products = $this->getProducts();
         $this->assertEquals(10, $products->count());
         $this->assertCount(10, $products);
     }
 
     public function testIterator()
     {
-        $selection = DatabaseConnection::getContext()->table('products');
-        $products = new Products($selection);
-
+        $products = $this->getProducts();
         $this->assertInstanceOf(Products::class, $products);
         foreach ($products as $product) {
             $this->assertInstanceOf(Product::class, $product);
@@ -225,10 +207,5 @@ class SelectionTest extends TestBase
     {
         $this->assertCount(6, $this->getProducts()->active());
         $this->assertCount(9, $this->getProducts()->forAdmin());
-    }
-
-    private function getProducts()
-    {
-        return new Products(DatabaseConnection::getContext()->table('products'));
     }
 }

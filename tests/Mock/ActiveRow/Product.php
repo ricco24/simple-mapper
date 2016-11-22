@@ -11,7 +11,7 @@ class Product extends ActiveRow
      */
     public function getType()
     {
-        return $this->getReference('type', ProductType::class);
+        return $this->ref('type');
     }
 
     /**
@@ -19,7 +19,7 @@ class Product extends ActiveRow
      */
     public function getCategories()
     {
-        return $this->getMMRelated('product_categories', 'product_category', ProductCategory::class);
+        return $this->mmRelated($this->related('product_categories'), 'product_category');
     }
 
     /**
@@ -27,10 +27,6 @@ class Product extends ActiveRow
      */
     public function getSortedCategories()
     {
-        $result = [];
-        foreach ($this->record->related('product_categories')->order('sorting ASC') as $row) {
-            $result[$row->product_category->id] = $this->prepareRecord($row->product_category, ProductCategory::class);
-        }
-        return $result;
+        return $this->mmRelated($this->related('product_categories')->order('sorting ASC'), 'product_category');
     }
 }
