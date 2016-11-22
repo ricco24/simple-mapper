@@ -12,18 +12,35 @@ class DatabaseConnection
 {
     private static $context;
 
+    private static $env = 'local';
+
     private static $config = [
-        'adapter' => 'mysql',
-        'host' => '127.0.0.1',
-        'db_name' => 'simple_mapper_test',
-        'user' => 'root',
-        'password' => 123
+        'local' => [
+            'adapter' => 'mysql',
+            'host' => '127.0.0.1',
+            'db_name' => 'simple_mapper_test',
+            'user' => 'root',
+            'password' => 123
+        ],
+        'ci' => [
+            'adapter' => 'mysql',
+            'host' => '127.0.0.1',
+            'db_name' => 'simple_mapper_test',
+            'user' => 'root',
+            'password' => ''
+        ]
     ];
+
+    public static function setEnvironment($env)
+    {
+        self::$env = in_array($env, ['local', 'ci']) ? $env : 'local';
+    }
 
     public static function getContext()
     {
         if (!self::$context) {
-            $connection = new Connection(self::$config['adapter'] . ':host=' . self::$config['host'] . ';dbname=' . self::$config['db_name'], self::$config['user'], self::$config['password']);
+            $config = self::$config[self::$env];
+            $connection = new Connection($config['adapter'] . ':host=' . $config['host'] . ';dbname=' . $config['db_name'], $config['user'], $config['password']);
             $structure = new Structure($connection, new DevNullStorage());
             $conventions = new DiscoveredConventions($structure);
             $context = new Context($connection, $structure, $conventions);
