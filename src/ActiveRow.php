@@ -2,6 +2,7 @@
 
 namespace SimpleMapper;
 
+use Nette\Database\Table\Selection as NetteDatabaseSelection;
 use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
 use ArrayAccess;
 use ArrayIterator;
@@ -13,12 +14,17 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
     /** @var NetteDatabaseActiveRow */
     protected $record;
 
+    /** @var Structure */
+    protected $structure;
+
     /**
      * @param NetteDatabaseActiveRow $record
+     * @param Structure $structure
      */
-    public function __construct(NetteDatabaseActiveRow $record)
+    public function __construct(NetteDatabaseActiveRow $record, Structure $structure)
     {
         $this->record = $record;
+        $this->structure = $structure;
     }
 
     /**
@@ -94,6 +100,31 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
         return $this->record->delete();
     }
 
+    /**
+     * Returns referenced row
+     * @param string $key
+     * @param string $throughColumn
+     * @return IRow|null
+     */
+    public function ref($key, $throughColumn = null)
+    {
+        $row = $this->record->ref($key, $throughColumn);
+        return $row instanceof IRow ? $this->prepareRecord($row) : $row;
+    }
+
+
+    /**
+     * Returns referencing rows
+     * @param string $key
+     * @param string $throughColumn
+     * @return mixed
+     */
+    public function related($key, $throughColumn = null)
+    {
+        $selection = $this->record->related($key, $throughColumn);
+        return $selection instanceof NetteDatabaseSelection ? $this->prepareSelection($selection) : $selection;
+    }
+
     /**********************************************************************\
      * IteratorAggregate interface
     \**********************************************************************/
@@ -150,55 +181,48 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
     }
 
     /**********************************************************************\
-     * referenced / related functions
+     * Extend methods
     \**********************************************************************/
 
     /**
-     * @param string $key
-     * @param string $recordClass
-     * @param null|string $throughColumn
-     * @return mixed
-     */
-    protected function getReference($key, $recordClass, $throughColumn = null)
-    {
-        $row = $this->record->ref($key, $throughColumn);
-        return $row instanceof IRow ? new $recordClass($row) : $row;
-    }
-
-    /**
-     * @param string $key
-     * @param string $selectionClass
-     * @param null|string $throughColumn
-     * @return mixed
-     */
-    protected function getRelated($key, $selectionClass, $throughColumn = null)
-    {
-        return new $selectionClass($this->record->related($key, $throughColumn));
-    }
-
-    /**
-     * @param string $key
-     * @param string $foreignName
-     * @param string $recordClass
-     * @param null|string $throughColumn
+     * Returns mm referencing rows
+     * @param Selection $selection
+     * @param string $ref
+     * @param string $refPrimary
      * @return array
      */
-    protected function getMMRelated($key, $foreignName, $recordClass, $throughColumn = null)
+    protected function mmRelated(Selection $selection, $ref, $refPrimary = 'id')
     {
         $result = [];
-        foreach ($this->record->related($key, $throughColumn) as $row) {
-            $result[] = new $recordClass($row->$foreignName);
+        foreach ($selection as $row) {
+            $result[$row->ref($ref)->$refPrimary] = $row->ref($ref);
         }
         return $result;
     }
 
+    /**********************************************************************\
+     * Build methods
+    \**********************************************************************/
+
     /**
+     * Prepare one record
      * @param IRow $row
-     * @param string $recordClass
      * @return mixed
      */
-    protected function prepareRecord(IRow $row, $recordClass)
+    protected function prepareRecord(IRow $row)
     {
-        return new $recordClass($row);
+        $recordClass = $this->structure->getActiveRowClass($row->getTable()->getName());
+        return new $recordClass($row, $this->structure);
+    }
+
+    /**
+     * Prepare selection
+     * @param NetteDatabaseSelection $selection
+     * @return mixed
+     */
+    protected function prepareSelection(NetteDatabaseSelection $selection)
+    {
+        $selectionClass = $this->structure->getSelectionClass($selection->getName());
+        return new $selectionClass($selection, $this->structure);
     }
 }

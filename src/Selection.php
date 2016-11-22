@@ -2,11 +2,10 @@
 
 namespace SimpleMapper;
 
-use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\IRow;
 use Nette\Database\Table\Selection as NetteDatabaseSelection;
+use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
 use Nette\InvalidArgumentException;
-use LogicException;
 use ArrayAccess;
 use Iterator;
 use Countable;
@@ -17,15 +16,17 @@ class Selection implements Iterator, Countable, ArrayAccess
     /** @var NetteDatabaseSelection */
     private $selection;
 
-    /** @var string */
-    protected $recordClass = '';
+    /** @var Structure */
+    protected $structure;
 
     /**
      * @param NetteDatabaseSelection $selection
+     * @param Structure|null $structure
      */
-    public function __construct(NetteDatabaseSelection $selection)
+    public function __construct(NetteDatabaseSelection $selection, Structure $structure = null)
     {
         $this->selection = $selection;
+        $this->structure = $structure;
     }
 
     /**
@@ -48,7 +49,7 @@ class Selection implements Iterator, Countable, ArrayAccess
     public function get($key)
     {
         $row = $this->selection->get($key);
-        return $row instanceof ActiveRow ? $this->prepareRecord($row) : $row;
+        return $row instanceof NetteDatabaseActiveRow ? $this->prepareRecord($row) : $row;
     }
 
     /**
@@ -83,7 +84,7 @@ class Selection implements Iterator, Countable, ArrayAccess
 
         $pairs = $this->selection->fetchPairs($key, $value);
         foreach ($pairs as $k => $v) {
-            $result[$k] = $v instanceof ActiveRow ? $this->prepareRecord($v) : $v;
+            $result[$k] = $v instanceof NetteDatabaseActiveRow ? $this->prepareRecord($v) : $v;
         }
         return $result;
     }
@@ -426,7 +427,7 @@ class Selection implements Iterator, Countable, ArrayAccess
     }
 
     /**********************************************************************\
-     * Internal methods
+     * Build methods
     \**********************************************************************/
 
     /**
@@ -434,10 +435,10 @@ class Selection implements Iterator, Countable, ArrayAccess
      * @param IRow $row
      * @return mixed
      */
-    private function prepareRecord(IRow $row)
+    protected function prepareRecord(IRow $row)
     {
-        $recordClass = $this->getRecordClass();
-        return new $recordClass($row);
+        $recordClass = $this->structure->getActiveRowClass($row->getTable()->getName());
+        return new $recordClass($row, $this->structure);
     }
 
     /**
@@ -445,24 +446,12 @@ class Selection implements Iterator, Countable, ArrayAccess
      * @param array $rows
      * @return array
      */
-    private function prepareRecords(array $rows)
+    protected function prepareRecords(array $rows)
     {
         $result = [];
         foreach ($rows as $row) {
             $result[] = $this->prepareRecord($row);
         }
         return $result;
-    }
-
-    /**
-     * Get defined record class or throw exception if class is not defined
-     * @return string
-     */
-    private function getRecordClass()
-    {
-        if (empty($this->recordClass)) {
-            throw new LogicException('$recordClass parameter has to be set in child class');
-        }
-        return $this->recordClass;
     }
 }

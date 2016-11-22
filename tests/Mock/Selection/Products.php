@@ -2,14 +2,10 @@
 
 namespace Kelemen\SimpleMapper\Tests\Mock\Selection;
 
-use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\Product;
 use SimpleMapper\Selection;
 
 class Products extends Selection
 {
-    /** @var string */
-    protected $recordClass = Product::class;
-
     /**
      * Fetch only active products
      * @return Products
