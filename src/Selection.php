@@ -265,7 +265,7 @@ class Selection implements Iterator, Countable, ArrayAccess
      * @param string $column    If it is not provided returns count of result rows, otherwise runs new sql counting query
      * @return int
      */
-    public function count($column = NULL)
+    public function count($column = null)
     {
         return $this->selection->count($column);
     }
