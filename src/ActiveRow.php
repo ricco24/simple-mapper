@@ -4,12 +4,12 @@ namespace SimpleMapper;
 
 use Nette\Database\Table\Selection as NetteDatabaseSelection;
 use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
-use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use Nette\Database\Table\IRow;
+use Nette\DeprecatedException;
 
-class ActiveRow implements ArrayAccess, IteratorAggregate
+class ActiveRow implements IteratorAggregate, IRow
 {
     /** @var NetteDatabaseActiveRow */
     protected $record;
@@ -43,6 +43,22 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
     public function getRecord()
     {
         return $this->record;
+    }
+
+    /**
+     * @return NetteDatabaseSelection
+     */
+    public function getTable()
+    {
+        return $this->record->getTable();
+    }
+
+    /**
+     * @param NetteDatabaseSelection $selection
+     */
+    public function setTable(NetteDatabaseSelection $selection)
+    {
+        trigger_error('Internal IRow interface method', E_USER_NOTICE);
     }
 
     /**********************************************************************\
@@ -142,16 +158,6 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
     \**********************************************************************/
 
     /**
-     * Stores value in column
-     * @param string $key   column name
-     * @param string $value
-     */
-    public function offsetSet($key, $value)
-    {
-        $this->record->offsetSet($key, $value);
-    }
-
-    /**
      * Returns value of column
      * @param string $key  column name
      * @return string
@@ -172,8 +178,20 @@ class ActiveRow implements ArrayAccess, IteratorAggregate
     }
 
     /**
+     * Stores value in column
+     * @param string $key   column name
+     * @param string $value
+     * @throws DeprecatedException
+     */
+    public function offsetSet($key, $value)
+    {
+        $this->record->offsetSet($key, $value);
+    }
+
+    /**
      * Removes column from data
      * @param string $key column name
+     * @throws DeprecatedException
      */
     public function offsetUnset($key)
     {
