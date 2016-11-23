@@ -84,7 +84,8 @@ class SelectionTest extends TestBase
     {
         $products = $this->getProducts();
         $this->assertInstanceOf(Products::class, $products);
-        foreach ($products as $product) {
+        foreach ($products as $productId => $product) {
+            $this->assertEquals($productId, $product->id);
             $this->assertInstanceOf(Product::class, $product);
         }
     }

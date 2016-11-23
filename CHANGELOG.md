@@ -1,6 +1,8 @@
 # Change log
 
 ## [Unreleased][unreleased]
+### Added
+- ActiveRow implements Nette\Database\Table\IRow
 
 ## 0.3.0 - 2016-11-23
 ### Added
