@@ -1,6 +1,8 @@
 # Change log
 
 ## [Unreleased][unreleased]
+
+## 0.4.0 - 2016-11-23
 ### Added
 - ActiveRow implements Nette\Database\Table\IRow
 
@@ -24,7 +26,8 @@
 ## 0.1.0
 - Initial version
 
-[unreleased]: https://github.com/ricco24/simple-mapper/compare/0.3.0...HEAD
+[unreleased]: https://github.com/ricco24/simple-mapper/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/ricco24/simple-mapper/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/ricco24/simple-mapper/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/ricco24/simple-mapper/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/ricco24/simple-mapper/compare/0.1.0...0.2.0
