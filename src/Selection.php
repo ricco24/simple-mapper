@@ -181,7 +181,7 @@ class Selection implements Iterator, Countable, ArrayAccess
      */
     public function order($columns, ...$params)
     {
-        $this->selection->order($columns, $params);
+        $this->selection->order($columns, ...$params);
         return $this;
     }
 
