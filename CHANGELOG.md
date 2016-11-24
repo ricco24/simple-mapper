@@ -2,6 +2,9 @@
 
 ## [Unreleased][unreleased]
 
+### Fixed
+- Selection order method with expanded params
+
 ## 0.4.0 - 2016-11-23
 ### Added
 - ActiveRow implements Nette\Database\Table\IRow
