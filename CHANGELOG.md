@@ -2,6 +2,9 @@
 
 ## [Unreleased][unreleased]
 
+### Added
+- Support for activeRow __get() transformation by defined structure
+
 ## 0.4.1 - 2016-11-24
 ### Fixed
 - Selection order method with expanded params

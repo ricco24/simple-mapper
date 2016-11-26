@@ -29,12 +29,12 @@ class ActiveRow implements IteratorAggregate, IRow
 
     /**
      * @param string $name
-     * @return mixed|NetteDatabaseActiveRow
+     * @return mixed|ActiveRow
      */
     public function __get($name)
     {
-        // Try to find record property
-        return $this->record->$name;
+        $result = $this->record->$name;
+        return $result instanceof IRow ? $this->prepareRecord($result) : $result;
     }
 
     /**

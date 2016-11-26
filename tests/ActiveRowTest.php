@@ -90,4 +90,12 @@ class ActiveRowTest extends TestBase
             $this->assertEquals(BaseData::$products[$productId][$key], $value);
         }
     }
+
+    public function testMagicGet()
+    {
+        $product = $this->getProduct(4);
+        $this->assertInstanceOf(ProductType::class, $product->type);
+        $this->assertEquals($product->type_id, $product->type->id);
+        $this->assertEquals(BaseData::$productTypes[$product->type_id]['title'], $product->type->title);
+    }
 }
