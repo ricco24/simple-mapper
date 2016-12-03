@@ -37,6 +37,14 @@ class Selection implements Iterator, Countable, ArrayAccess
         return $this->selection;
     }
 
+    /**
+     * Clone object
+     */
+    public function __clone()
+    {
+        $this->selection = clone $this->selection;
+    }
+
     /**********************************************************************\
      * Wrapper function - fetch
     \**********************************************************************/
