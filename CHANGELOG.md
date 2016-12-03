@@ -2,6 +2,10 @@
 
 ## [Unreleased][unreleased]
 
+## 0.5.1 - 2016-12-03
+### Fixed
+- Fixed selection clone behaviour
+
 ## 0.5.0 - 2016-11-27
 ### Added
 - Support for activeRow __get() transformation by defined structure
@@ -34,7 +38,8 @@
 ## 0.1.0
 - Initial version
 
-[unreleased]: https://github.com/ricco24/simple-mapper/compare/0.5.0...HEAD
+[unreleased]: https://github.com/ricco24/simple-mapper/compare/0.5.1...HEAD
+[0.5.1]: https://github.com/ricco24/simple-mapper/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/ricco24/simple-mapper/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/ricco24/simple-mapper/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/ricco24/simple-mapper/compare/0.3.0...0.4.0
