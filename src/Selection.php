@@ -9,6 +9,7 @@ use Nette\InvalidArgumentException;
 use ArrayAccess;
 use Iterator;
 use Countable;
+use SimpleMapper\Structure\Structure;
 use Traversable;
 
 class Selection implements Iterator, Countable, ArrayAccess
@@ -21,9 +22,9 @@ class Selection implements Iterator, Countable, ArrayAccess
 
     /**
      * @param NetteDatabaseSelection $selection
-     * @param Structure|null $structure
+     * @param Structure $structure
      */
-    public function __construct(NetteDatabaseSelection $selection, Structure $structure = null)
+    public function __construct(NetteDatabaseSelection $selection, Structure $structure)
     {
         $this->selection = $selection;
         $this->structure = $structure;
@@ -43,6 +44,29 @@ class Selection implements Iterator, Countable, ArrayAccess
     public function __clone()
     {
         $this->selection = clone $this->selection;
+    }
+
+    /********************************************************************\
+    | Magic methods
+    \********************************************************************/
+
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($name, array $arguments)
+    {
+        if (substr($name, 0, 5) === 'scope') {
+            $scopeName = lcfirst(substr($name, 5));
+            $scope = $this->structure->getScope($this->selection->getName(), $scopeName);
+            if (!$scope) {
+                trigger_error('Scope ' . $scopeName . ' is not defined for table ' . $this->selection->getName(), E_USER_ERROR);
+            }
+            return $this->where(call_user_func_array($scope->getCallback(), $arguments));
+        }
+
+        trigger_error('Call to undefined method ' . get_class($this) . '::' . $name . '()', E_USER_ERROR);
     }
 
     /**********************************************************************\
@@ -145,7 +169,7 @@ class Selection implements Iterator, Countable, ArrayAccess
 
     /**
      * Adds where condition, more calls appends with AND
-     * @param string $condition
+     * @param string|string[] $condition
      * @param mixed ...$params
      * @return Selection
      */

@@ -8,6 +8,7 @@ use ArrayIterator;
 use IteratorAggregate;
 use Nette\Database\Table\IRow;
 use Nette\DeprecatedException;
+use SimpleMapper\Structure\Structure;
 
 class ActiveRow implements IteratorAggregate, IRow
 {
@@ -120,7 +121,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * Returns referenced row
      * @param string $key
      * @param string $throughColumn
-     * @return IRow|null
+     * @return ActiveRow|null
      */
     public function ref($key, $throughColumn = null)
     {
@@ -225,7 +226,7 @@ class ActiveRow implements IteratorAggregate, IRow
     /**
      * Prepare one record
      * @param IRow $row
-     * @return mixed
+     * @return ActiveRow
      */
     protected function prepareRecord(IRow $row)
     {
@@ -236,7 +237,7 @@ class ActiveRow implements IteratorAggregate, IRow
     /**
      * Prepare selection
      * @param NetteDatabaseSelection $selection
-     * @return mixed
+     * @return Selection
      */
     protected function prepareSelection(NetteDatabaseSelection $selection)
     {

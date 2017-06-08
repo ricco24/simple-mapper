@@ -8,6 +8,8 @@ require_once 'Mock/Selection/ProductCategories.php';
 require_once 'Mock/ActiveRow/Product.php';
 require_once 'Mock/ActiveRow/ProductType.php';
 require_once 'Mock/ActiveRow/ProductCategory.php';
+require_once 'Mock/Repository/ProductRepository.php';
+require_once 'Mock/Repository/ProductSoftDeleteRepository.php';
 require_once 'Mock/Structure.php';
 
 use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\Product;

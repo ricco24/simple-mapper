@@ -5,18 +5,16 @@ namespace Kelemen\SimpleMapper\Tests;
 require_once 'TestBase.php';
 
 use SimpleMapper\ActiveRow;
-use SimpleMapper\CustomStructure;
 use SimpleMapper\Selection;
+use SimpleMapper\Structure\CustomStructure;
 
 class StructureTest extends TestBase
 {
    public function testCustomStructure()
    {
        $structure = new CustomStructure();
-       $structure->addActiveRowClass('table1', 'row class table 1');
-       $structure->addActiveRowClass('table2', 'row class table 2');
-       $structure->addSelectionClass('table1', 'select class table 1');
-       $structure->addSelectionClass('table2', 'select class table 2');
+       $structure->registerTable('table1', 'row class table 1', 'select class table 1');
+       $structure->registerTable('table2', 'row class table 2', 'select class table 2');
 
        $this->assertEquals('row class table 1', $structure->getActiveRowClass('table1'));
        $this->assertEquals('row class table 2', $structure->getActiveRowClass('table2'));
@@ -38,9 +36,7 @@ class StructureTest extends TestBase
     {
         $structure = new CustomStructure();
         $structure
-            ->addActiveRowClass('table1', 'row class table 1')
-            ->addActiveRowClass('table2', 'row class table 2')
-            ->addSelectionClass('table1', 'select class table 1')
-            ->addSelectionClass('table2', 'select class table 2');
+            ->registerTable('table1', 'row class table 1', 'select class table 1')
+            ->registerTable('table2', 'row class table 2', 'select class table 2');
     }
 }

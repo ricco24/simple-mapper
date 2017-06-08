@@ -1,5 +1,7 @@
 <?php
 
+use Nette\Utils\DateTime;
+
 class BaseData
 {
     public static $productTypes = [
@@ -11,16 +13,16 @@ class BaseData
     ];
 
     public static $products = [
-        1 => ['id' => 1, 'title' => 'Product 1', 'image' => 'Product image 1', 'type_id' => 1, 'price' => 24, 'is_deleted' => 0, 'is_hidden' => 0],
-        2 => ['id' => 2, 'title' => 'Product 2', 'image' => 'Product image 2', 'type_id' => 1, 'price' => 20, 'is_deleted' => 0, 'is_hidden' => 0],
-        3 => ['id' => 3, 'title' => 'Product 3', 'image' => 'Product image 3', 'type_id' => 1, 'price' => 17, 'is_deleted' => 0, 'is_hidden' => 0],
-        4 => ['id' => 4, 'title' => 'Product 4', 'image' => 'Product image 4', 'type_id' => 2, 'price' => 74, 'is_deleted' => 1, 'is_hidden' => 0],
-        5 => ['id' => 5, 'title' => 'Product 5', 'image' => 'Product image 5', 'type_id' => 3, 'price' => 25, 'is_deleted' => 0, 'is_hidden' => 0],
-        6 => ['id' => 6, 'title' => 'Product 6', 'image' => 'Product image 6', 'type_id' => 3, 'price' => 99, 'is_deleted' => 0, 'is_hidden' => 0],
-        7 => ['id' => 7, 'title' => 'Product 7', 'image' => 'Product image 7', 'type_id' => 4, 'price' => 7, 'is_deleted' => 1, 'is_hidden' => 0],
-        8 => ['id' => 8, 'title' => 'Product 8', 'image' => 'Product image 8', 'type_id' => 4, 'price' => 64, 'is_deleted' => 1, 'is_hidden' => 0],
-        9 => ['id' => 9, 'title' => 'Product 9', 'image' => 'Product image 9', 'type_id' => 5, 'price' => 32, 'is_deleted' => 0, 'is_hidden' => 1],
-        10 => ['id' => 10, 'title' => 'Product 10', 'image' => 'Product image 10', 'type_id' => 5, 'price' => 82, 'is_deleted' => 0, 'is_hidden' => 0]
+        1 => ['id' => 1, 'title' => 'Product 1', 'image' => 'Product image 1', 'type_id' => 1, 'price' => 24, 'is_deleted' => 0, 'is_hidden' => 0, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00'],
+        2 => ['id' => 2, 'title' => 'Product 2', 'image' => 'Product image 2', 'type_id' => 1, 'price' => 20, 'is_deleted' => 0, 'is_hidden' => 0, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00'],
+        3 => ['id' => 3, 'title' => 'Product 3', 'image' => 'Product image 3', 'type_id' => 1, 'price' => 17, 'is_deleted' => 0, 'is_hidden' => 0, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00'],
+        4 => ['id' => 4, 'title' => 'Product 4', 'image' => 'Product image 4', 'type_id' => 2, 'price' => 74, 'is_deleted' => 1, 'is_hidden' => 0, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00'],
+        5 => ['id' => 5, 'title' => 'Product 5', 'image' => 'Product image 5', 'type_id' => 3, 'price' => 25, 'is_deleted' => 0, 'is_hidden' => 0, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00'],
+        6 => ['id' => 6, 'title' => 'Product 6', 'image' => 'Product image 6', 'type_id' => 3, 'price' => 99, 'is_deleted' => 0, 'is_hidden' => 0, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00'],
+        7 => ['id' => 7, 'title' => 'Product 7', 'image' => 'Product image 7', 'type_id' => 4, 'price' => 7, 'is_deleted' => 1, 'is_hidden' => 0, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00'],
+        8 => ['id' => 8, 'title' => 'Product 8', 'image' => 'Product image 8', 'type_id' => 4, 'price' => 64, 'is_deleted' => 1, 'is_hidden' => 0, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00'],
+        9 => ['id' => 9, 'title' => 'Product 9', 'image' => 'Product image 9', 'type_id' => 5, 'price' => 32, 'is_deleted' => 0, 'is_hidden' => 1, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00'],
+        10 => ['id' => 10, 'title' => 'Product 10', 'image' => 'Product image 10', 'type_id' => 5, 'price' => 82, 'is_deleted' => 0, 'is_hidden' => 0, 'created_at' => '2011-10-01 22:20:05', 'updated_at' => '2015-05-20 22:10:00']
     ];
 
     public static $productCategories = [
