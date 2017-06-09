@@ -7,6 +7,7 @@ use Nette\Database\DriverException;
 use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
 use Nette\Database\Table\Selection as NetteDatabaseSelection;
 use SimpleMapper\Behaviour\Behaviour;
+use SimpleMapper\Structure\EmptyStructure;
 use SimpleMapper\Structure\Structure;
 use Traversable;
 use Exception;
@@ -34,18 +35,20 @@ abstract class Repository
 
     /**
      * @param Context $databaseContext
-     * @param Structure $structure
      */
-    public function __construct(Context $databaseContext, Structure $structure)
+    public function __construct(Context $databaseContext)
     {
         $this->databaseContext = $databaseContext;
-        $this->structure = $structure;
-
-        if (count($this->getScopes())) {
-            $this->structure->registerScopes(static::$tableName, $this->getScopes());
-        }
-
+        $this->structure = new EmptyStructure();
         $this->configure();
+    }
+
+    /**
+     * @param Structure $structure
+     */
+    public function setStructure(Structure $structure)
+    {
+        $this->structure = $structure;
     }
 
     /**
@@ -95,7 +98,7 @@ abstract class Repository
     /**
      * Configure repository
      */
-    public function configure(): void
+    protected function configure(): void
     {
         // override in child
     }
@@ -104,7 +107,7 @@ abstract class Repository
      * Define table scopes
      * @return array
      */
-    protected function getScopes(): array
+    public function getScopes(): array
     {
         // override in child
         return [];

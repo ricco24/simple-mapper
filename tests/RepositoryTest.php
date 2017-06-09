@@ -6,6 +6,7 @@ use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\Product;
 use Kelemen\SimpleMapper\Tests\Mock\Repository\ProductRepository;
 use DatabaseConnection;
 use Kelemen\SimpleMapper\Tests\Mock\Repository\ProductSoftDeleteRepository;
+use Kelemen\SimpleMapper\Tests\Mock\Structure;
 
 require_once 'TestBase.php';
 
@@ -13,8 +14,8 @@ class RepositoryTest extends TestBase
 {
     public function testInsert()
     {
-        $repository = new ProductRepository(DatabaseConnection::getContext(), $this->getStructure());
-        $product = $repository->insert([
+        $this->getStructure();
+        $product = $this->getProductsRepository()->insert([
             'title' => 'New product',
             'image' => 'image 123',
             'type_id' => 1,
@@ -32,7 +33,8 @@ class RepositoryTest extends TestBase
 
     public function testUpdate()
     {
-        $repository = new ProductRepository(DatabaseConnection::getContext(), $this->getStructure());
+        $this->getStructure();
+        $repository = $this->getProductsRepository();
         $product = $repository->findAll()->wherePrimary(1)->fetch();
         $updatedAt = $product['updated_at'];
         $updatedProduct = $repository->update($product, [
@@ -54,7 +56,8 @@ class RepositoryTest extends TestBase
 
     public function testDelete()
     {
-        $repository = new ProductRepository(DatabaseConnection::getContext(), $this->getStructure());
+        $this->getStructure();
+        $repository = $this->getProductsRepository();
         $product = $repository->findAll()->wherePrimary(2)->fetch();
         $deleteResult = $repository->delete($product);
 
@@ -64,7 +67,8 @@ class RepositoryTest extends TestBase
 
     public function testSoftDelete()
     {
-        $repository = new ProductSoftDeleteRepository(DatabaseConnection::getContext(), $this->getStructure());
+        $this->getStructureSoftDeletedProducts();
+        $repository = $this->getProductsSoftDeletedRepository();
         $product = $repository->findAll()->wherePrimary(3)->fetch();
         $deleteResult = $repository->delete($product);
 
@@ -74,7 +78,8 @@ class RepositoryTest extends TestBase
 
     public function testScopes()
     {
-        $repository = new ProductRepository(DatabaseConnection::getContext(), $this->getStructure());
+        $this->getStructure();
+        $repository = $this->getProductsRepository();
         $this->assertEquals(10, $repository->findAll()->count('*'));
         $this->assertEquals(7, $repository->scopeAdmin()->count('*'));
         $this->assertEquals(5, $repository->scopeAdmin()->scopePriceGreater()->count('*'));

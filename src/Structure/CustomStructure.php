@@ -4,6 +4,7 @@ namespace SimpleMapper\Structure;
 
 use SimpleMapper\ActiveRow;
 use SimpleMapper\Exception\SimpleMapperException;
+use SimpleMapper\Repository;
 use SimpleMapper\Scope\Scope;
 use SimpleMapper\Selection;
 
@@ -16,10 +17,11 @@ class CustomStructure implements Structure
      * @param string $table
      * @param string|null $activeRowClass
      * @param string|null $selectionClass
+     * @param Repository|null $repository
      * @return CustomStructure
      * @throws SimpleMapperException
      */
-    public function registerTable(string $table, string $activeRowClass = null, string $selectionClass = null): CustomStructure
+    public function registerTable(string $table, string $activeRowClass = null, string $selectionClass = null, Repository $repository = null): CustomStructure
     {
         if ($activeRowClass) {
             $this->data[$table]['row'] = $activeRowClass;
@@ -29,25 +31,18 @@ class CustomStructure implements Structure
             $this->data[$table]['selection'] = $selectionClass;
         }
 
-        return $this;
-    }
+        if ($repository) {
+            foreach ($repository->getScopes() as $scope) {
+                if (!($scope instanceof Scope)) {
+                    throw new SimpleMapperException('Scopes can be only of class ' . Scope::class);
+                }
 
-    /**
-     * Register table scopes (for repository and selection)
-     * @param string $table
-     * @param array $scopes
-     * @throws SimpleMapperException
-     * @internal
-     */
-    public function registerScopes(string $table, array $scopes): void
-    {
-        foreach ($scopes as $scope) {
-            if (!($scope instanceof Scope)) {
-                throw new SimpleMapperException('Scopes can be only of class ' . Scope::class);
+                $this->data[$table]['scopes'][$scope->getName()] = $scope;
             }
-
-            $this->data[$table]['scopes'][$scope->getName()] = $scope;
+            $repository->setStructure($this);
         }
+
+        return $this;
     }
 
     /**

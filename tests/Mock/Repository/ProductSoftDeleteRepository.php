@@ -17,7 +17,7 @@ class ProductSoftDeleteRepository extends Repository
     /**
      * Configure repository
      */
-    public function configure(): void
+    protected function configure(): void
     {
         $this->registerBehaviour(new DateBehaviour());
     }
@@ -26,7 +26,7 @@ class ProductSoftDeleteRepository extends Repository
      * Register scopes
      * @return array
      */
-    protected function getScopes(): array
+    public function getScopes(): array
     {
         return [
             new Scope('admin', function () {
