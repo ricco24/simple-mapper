@@ -6,9 +6,11 @@ require_once 'TestBase.php';
 
 use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\ProductType;
 use BaseData;
+use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\Sticker;
 use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
 use Nette\Database\Table\Selection as NetteDatabaseSelection;
 use Nette\DeprecatedException;
+use Nette\MemberAccessException;
 use SimpleMapper\Exception\ActiveRowException;
 
 class ActiveRowTest extends TestBase
@@ -85,6 +87,14 @@ class ActiveRowTest extends TestBase
         $product = $this->getProduct(4);
         $this->assertTrue(isset($product['title']));
         $this->assertEquals('Product 4', $product['title']);
+        $this->assertInstanceOf(Sticker::class, $product['sticker']);
+    }
+
+    public function testArrayAccessGetError()
+    {
+        $product = $this->getProduct(4);
+        $this->expectException(MemberAccessException::class);
+        $product['undeclared'];
     }
 
     public function testArrayAccessSet()
@@ -116,5 +126,6 @@ class ActiveRowTest extends TestBase
         $this->assertInstanceOf(ProductType::class, $product->type);
         $this->assertEquals($product->type_id, $product->type->id);
         $this->assertEquals(BaseData::$productTypes[$product->type_id]['title'], $product->type->title);
+        $this->assertInstanceOf(Sticker::class, $product->sticker);
     }
 }

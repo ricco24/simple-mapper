@@ -1,6 +1,8 @@
 # Change log
 
 ## [Unreleased][unreleased]
+#### Fixed
+- ActiveRow ArrayAccess for related table with registered mapping
 
 ## 0.5.1 - 2016-12-03
 ### Fixed
