@@ -8,6 +8,7 @@ use ArrayIterator;
 use IteratorAggregate;
 use Nette\Database\Table\IRow;
 use Nette\DeprecatedException;
+use SimpleMapper\Exception\ActiveRowException;
 use SimpleMapper\Structure\Structure;
 
 class ActiveRow implements IteratorAggregate, IRow
@@ -56,10 +57,11 @@ class ActiveRow implements IteratorAggregate, IRow
 
     /**
      * @param NetteDatabaseSelection $selection
+     * @throws ActiveRowException
      */
     public function setTable(NetteDatabaseSelection $selection)
     {
-        trigger_error('Internal IRow interface method', E_USER_NOTICE);
+        throw new ActiveRowException('Internal IRow interface method');
     }
 
     /**********************************************************************\
