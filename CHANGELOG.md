@@ -1,6 +1,14 @@
 # Change log
 
 ## [Unreleased][unreleased]
+#### Added
+- Repository class
+- Behaviours
+- Scopes
+
+#### Changed
+- Add PHP 7.1 support only (BC break)
+
 #### Fixed
 - ActiveRow ArrayAccess for related table with registered mapping
 
