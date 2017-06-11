@@ -7,6 +7,7 @@ use Nette\Database\DriverException;
 use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
 use Nette\Database\Table\Selection as NetteDatabaseSelection;
 use SimpleMapper\Behaviour\Behaviour;
+use SimpleMapper\Exception\RepositoryException;
 use SimpleMapper\Structure\EmptyStructure;
 use SimpleMapper\Structure\Structure;
 use Traversable;
@@ -49,6 +50,9 @@ abstract class Repository
     public function setStructure(Structure $structure)
     {
         $this->structure = $structure;
+        if (count($this->getScopes())) {
+            $this->structure->registerScopes(static::getTableName(), $this->getScopes());
+        }
     }
 
     /**
@@ -60,57 +64,11 @@ abstract class Repository
     }
 
     /**
-     * @return NetteDatabaseSelection
-     */
-    public function getTable(): NetteDatabaseSelection
-    {
-        return $this->databaseContext->table(static::getTableName());
-    }
-
-    /**
      * @return Context
      */
     public function getDatabaseContext(): Context
     {
         return $this->databaseContext;
-    }
-
-    /**
-     * @param Behaviour $behaviour
-     * @return Repository
-     */
-    public function registerBehaviour(Behaviour $behaviour): Repository
-    {
-        $this->behaviours[get_class($behaviour)] = $behaviour;
-        return $this;
-    }
-
-    /**
-     * Get behaviour by class
-     * @param string $class
-     * @return Behaviour|null
-     */
-    public function getBehaviour($class): ?Behaviour
-    {
-        return $this->behaviours[$class] ?? null;
-    }
-
-    /**
-     * Configure repository
-     */
-    protected function configure(): void
-    {
-        // override in child
-    }
-
-    /**
-     * Define table scopes
-     * @return array
-     */
-    public function getScopes(): array
-    {
-        // override in child
-        return [];
     }
 
     /********************************************************************\
@@ -121,6 +79,7 @@ abstract class Repository
      * @param string $name
      * @param array $arguments
      * @return mixed
+     * @throws RepositoryException
      */
     public function __call(string $name, array $arguments)
     {
@@ -128,14 +87,14 @@ abstract class Repository
             $scopeName = lcfirst(substr($name, 5));
             $scope = $this->structure->getScope(static::$tableName, $scopeName);
             if (!$scope) {
-                trigger_error('Scope ' . $scopeName . ' is not defined for table ' . static::$tableName, E_USER_ERROR);
+                throw new RepositoryException('Scope ' . $scopeName . ' is not defined for table ' . static::$tableName);
             }
 
             $scopeNameToCall = 'scope' . ucfirst($scope->getName());
             return call_user_func_array([$this->findAll(), $scopeNameToCall], $arguments);
         }
 
-        trigger_error('Call to undefined method ' . get_class($this) . '::' . $name . '()', E_USER_ERROR);
+        throw new RepositoryException('Call to undefined method ' . get_class($this) . '::' . $name . '()');
     }
 
     /********************************************************************\
@@ -270,6 +229,56 @@ abstract class Repository
         });
 
         return $result;
+    }
+
+    /********************************************************************\
+    | Internal methods
+    \********************************************************************/
+
+    /**
+     * @return NetteDatabaseSelection
+     */
+    protected function getTable(): NetteDatabaseSelection
+    {
+        return $this->databaseContext->table(static::getTableName());
+    }
+
+    /**
+     * @param Behaviour $behaviour
+     * @return Repository
+     */
+    protected function registerBehaviour(Behaviour $behaviour): Repository
+    {
+        $this->behaviours[get_class($behaviour)] = $behaviour;
+        return $this;
+    }
+
+    /**
+     * Get behaviour by class
+     * @param string $class
+     * @return Behaviour|null
+     */
+    protected function getBehaviour($class): ?Behaviour
+    {
+        return $this->behaviours[$class] ?? null;
+    }
+
+    /**
+     * Configure repository
+     */
+    protected function configure(): void
+    {
+        // override in child
+    }
+
+    /**
+     * Define table scopes
+     * @return array
+     */
+    protected function getScopes(): array
+    {
+        // override in child
+        return [];
     }
 
     /********************************************************************\

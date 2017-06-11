@@ -8,10 +8,17 @@ create table products (
   price int not null,
   is_deleted int(1) default false,
   is_hidden int(1) default false,
+  sticker_id int default null,
   created_at datetime not null,
   updated_at datetime not null,
 
-  foreign key (type_id) references product_types(id) on update cascade on delete cascade
+  foreign key (type_id) references product_types(id) on update cascade on delete cascade,
+  foreign key (sticker_id) references stickers(id) on update cascade on delete cascade
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table stickers (
+  id int not null primary key auto_increment,
+  title varchar(255)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table product_types(

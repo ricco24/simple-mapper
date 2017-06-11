@@ -7,34 +7,33 @@ require_once 'Mock/Selection/Products.php';
 require_once 'Mock/Selection/ProductCategories.php';
 require_once 'Mock/ActiveRow/Product.php';
 require_once 'Mock/ActiveRow/ProductType.php';
+require_once 'Mock/ActiveRow/Sticker.php';
 require_once 'Mock/ActiveRow/ProductCategory.php';
-require_once 'Mock/Repository/ProductRepository.php';
-require_once 'Mock/Repository/ProductSoftDeleteRepository.php';
-require_once 'Mock/Repository/ProductCategoryRepository.php';
+require_once 'Mock/Repository/ProductsRepository.php';
+require_once 'Mock/Repository/StickersRepository.php';
 
 use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\Product;
 use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\ProductCategory;
 use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\ProductType;
-use Kelemen\SimpleMapper\Tests\Mock\Repository\ProductCategoryRepository;
-use Kelemen\SimpleMapper\Tests\Mock\Repository\ProductRepository;
-use Kelemen\SimpleMapper\Tests\Mock\Repository\ProductSoftDeleteRepository;
+use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\Sticker;
+use Kelemen\SimpleMapper\Tests\Mock\Repository\ProductsRepository;
+use Kelemen\SimpleMapper\Tests\Mock\Repository\StickersRepository;
 use Kelemen\SimpleMapper\Tests\Mock\Selection\ProductCategories;
 use Kelemen\SimpleMapper\Tests\Mock\Selection\Products;
 use Kelemen\SimpleMapper\Tests\Mock\Selection\ProductTypes;
 use PHPUnit_Framework_TestCase;
 use DatabaseConnection;
-use SimpleMapper\Structure\CustomStructure;
+use SimpleMapper\Mapper;
+use SimpleMapper\Selection;
+use SimpleMapper\Structure\BaseStructure;
 
 class TestBase extends PHPUnit_Framework_TestCase
 {
-    /** @var ProductRepository */
+    /** @var ProductsRepository */
     protected $productsRepository;
 
-    /** @var ProductSoftDeleteRepository */
-    protected $productsSoftDeletedRepository;
-
-    /** @var ProductCategoryRepository */
-    protected $productCategoryRepository;
+    /** @var StickersRepository */
+    protected $stickersRepository;
 
     /**
      * Setup before every test
@@ -51,80 +50,56 @@ class TestBase extends PHPUnit_Framework_TestCase
      */
     protected function getProduct($id)
     {
-        $p = DatabaseConnection::getContext()->table('products')->wherePrimary($id)->fetch();
-        return new Product($p, $this->getStructure());
+        return $this->getMapper()->getRepository(ProductsRepository::class)->findBy(['id' => $id])->fetch();
     }
 
     /**
      * Fetch products selection
      * @param array $where
-     * @return Products
+     * @return Selection|Products
      */
     protected function getProducts(array $where = [])
     {
-        $selection = DatabaseConnection::getContext()->table('products');
+        $selection = $this->getMapper()->getRepository(ProductsRepository::class)->findAll();
         if ($where) {
             $selection->where($where);
         }
-        return new Products($selection, $this->getStructure());
+        return $selection;
     }
 
     /**
-     * @return ProductRepository
+     * @return ProductsRepository
      */
     protected function getProductsRepository()
     {
         if (!$this->productsRepository) {
-            $this->productsRepository = new ProductRepository(DatabaseConnection::getContext());
+            $this->productsRepository = new ProductsRepository(DatabaseConnection::getContext());
         }
         return $this->productsRepository;
     }
 
     /**
-     * @return ProductSoftDeleteRepository
+     * @return StickersRepository
      */
-    protected function getProductsSoftDeletedRepository()
+    protected function getStickersRepository()
     {
-        if (!$this->productsSoftDeletedRepository) {
-            $this->productsSoftDeletedRepository = new ProductSoftDeleteRepository(DatabaseConnection::getContext());
+        if (!$this->stickersRepository) {
+            $this->stickersRepository = new StickersRepository(DatabaseConnection::getContext());
         }
-        return $this->productsSoftDeletedRepository;
+        return $this->stickersRepository;
     }
 
     /**
-     * @return ProductCategoryRepository
+     * @return Mapper
      */
-    protected function getProductCategoryRepository()
+    protected function getMapper()
     {
-        if (!$this->productCategoryRepository) {
-            $this->productCategoryRepository = new ProductCategoryRepository(DatabaseConnection::getContext());
-        }
-        return $this->productCategoryRepository;
-    }
-
-    /**
-     * Build structure
-     * @return CustomStructure
-     */
-    protected function getStructure()
-    {
-        $structure = new CustomStructure();
-        $structure ->registerTable('products', Product::class, Products::class, $this->getProductsRepository())
-            ->registerTable('product_types', ProductType::class, ProductTypes::class)
-            ->registerTable('product_categories', ProductCategory::class, ProductCategories::class, $this->getProductCategoryRepository());
-        return $structure;
-    }
-
-    /**
-     * Build structure
-     * @return CustomStructure
-     */
-    protected function getStructureSoftDeletedProducts()
-    {
-        $structure = new CustomStructure();
-        $structure ->registerTable('products', Product::class, Products::class, $this->getProductsSoftDeletedRepository())
-            ->registerTable('product_types', ProductType::class, ProductTypes::class)
-            ->registerTable('product_categories', ProductCategory::class, ProductCategories::class, $this->getProductCategoryRepository());
-        return $structure;
+        $mapper = new Mapper(new BaseStructure());
+        $mapper
+            ->mapRepository($this->getProductsRepository(), Product::class, Products::class)
+            ->mapRepository($this->getStickersRepository(), Sticker::class)
+            ->mapTableName('product_types', ProductType::class, ProductTypes::class)
+            ->mapTableName('product_categories', ProductCategory::class, ProductCategories::class);
+        return $mapper;
     }
 }

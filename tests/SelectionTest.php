@@ -6,7 +6,6 @@ require_once 'TestBase.php';
 
 use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\Product;
 use Kelemen\SimpleMapper\Tests\Mock\Selection\Products;
-use DatabaseConnection;
 use BaseData;
 use Nette\MemberAccessException;
 

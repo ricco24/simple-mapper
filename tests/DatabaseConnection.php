@@ -57,10 +57,12 @@ class DatabaseConnection
         $database->query('DELETE FROM product_categories');
         $database->query('DELETE FROM product_types');
         $database->query('DELETE FROM products');
+        $database->query('DELETE FROM stickers');
     }
 
     public static function insertBaseData()
     {
+        self::insertToTable('stickers', BaseData::$stickers);
         self::insertToTable('product_types', BaseData::$productTypes);
         self::insertToTable('products', BaseData::$products);
         self::insertToTable('product_categories', BaseData::$productCategories);

@@ -11,10 +11,13 @@ use SimpleMapper\Scope\Scope;
  * @method Products scopeAdmin()
  * @method Products scopePriceGreater(float $price = 20)
  */
-class ProductRepository extends Repository
+class ProductsRepository extends Repository
 {
     /** @var string */
     protected static $tableName = 'products';
+
+    /** @var string */
+    protected $softDelete = 'is_deleted';
 
     /**
      * Configure repository
