@@ -4,6 +4,10 @@ namespace Kelemen\SimpleMapper\Tests\Mock\Selection;
 
 use SimpleMapper\Selection;
 
+/**
+ * @method Products scopeAdmin()
+ * @method Products scopePriceGreater(float $price = 20)
+ */
 class Products extends Selection
 {
     /**

@@ -6,7 +6,7 @@ namespace SimpleMapper\Exception;
 
 use Exception;
 
-class SimpleMapperException extends Exception
+class ActiveRowException extends Exception
 {
 
 }

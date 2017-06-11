@@ -6,10 +6,26 @@ require_once 'TestBase.php';
 
 use Kelemen\SimpleMapper\Tests\Mock\ActiveRow\ProductType;
 use BaseData;
+use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
+use Nette\Database\Table\Selection as NetteDatabaseSelection;
 use Nette\DeprecatedException;
+use SimpleMapper\Exception\ActiveRowException;
 
 class ActiveRowTest extends TestBase
 {
+    public function testBasics()
+    {
+        $product = $this->getProduct(2);
+        $this->assertInstanceOf(NetteDatabaseActiveRow::class, $product->getRecord());
+        $this->assertEquals(2, $product->getRecord()->getPrimary());
+    }
+
+    public function testSetTableMethod()
+    {
+        $this->expectException(ActiveRowException::class);
+        $this->getProduct(2)->setTable($this->getProducts()->getSelection());
+    }
+
     public function testReference()
     {
         $products = $this->getProducts();
@@ -59,6 +75,9 @@ class ActiveRowTest extends TestBase
         $this->assertTrue($product->update(['title' => 'Updated product']));
         $this->assertEquals('Updated product', $product->title);
         $this->assertEquals(1, $product->delete());
+        $this->assertEquals($product, (string) $product);
+        $this->assertInstanceOf(NetteDatabaseSelection::class, $product->getTable());
+        $this->assertEquals('products', $product->getTable()->getName());
     }
 
     public function testArrayAccessIssetGet()

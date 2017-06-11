@@ -7,7 +7,7 @@ use SimpleMapper\ActiveRow;
 class Product extends ActiveRow
 {
     /**
-     * @return ProductType
+     * @return ActiveRow|ProductType
      */
     public function getType()
     {
