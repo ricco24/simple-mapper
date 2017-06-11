@@ -10,7 +10,7 @@ use SimpleMapper\Scope\Scope;
 use SimpleMapper\Selection;
 use SimpleMapper\Structure\BaseStructure;
 
-class StructureTest extends TestBase
+class BaseStructureTest extends TestBase
 {
    public function testActiveRowAndSelectionRegistration()
    {
@@ -39,10 +39,8 @@ class StructureTest extends TestBase
     public function testFluentInterface()
     {
         $structure = new BaseStructure();
-        $structure->registerActiveRowClass('table1', 'row class table 1')
-            ->registerSelectionClass('table1', 'select class table 1')
-            ->registerActiveRowClass('table2', 'row class table 2')
-            ->registerSelectionClass('table2', 'select class table 2');
+        $this->assertInstanceOf(BaseStructure::class, $structure->registerActiveRowClass('table1', 'row class table 1'));
+        $this->assertInstanceOf(BaseStructure::class,  $structure->registerActiveRowClass('table2', 'row class table 2'));
     }
 
     public function testScopes()

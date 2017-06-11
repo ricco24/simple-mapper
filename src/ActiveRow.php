@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleMapper;
 
 use Nette\Database\Table\Selection as NetteDatabaseSelection;
@@ -42,7 +44,7 @@ class ActiveRow implements IteratorAggregate, IRow
     /**
      * @return NetteDatabaseActiveRow
      */
-    public function getRecord()
+    public function getRecord(): NetteDatabaseActiveRow
     {
         return $this->record;
     }
@@ -50,7 +52,7 @@ class ActiveRow implements IteratorAggregate, IRow
     /**
      * @return NetteDatabaseSelection
      */
-    public function getTable()
+    public function getTable(): NetteDatabaseSelection
     {
         return $this->record->getTable();
     }
@@ -59,7 +61,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param NetteDatabaseSelection $selection
      * @throws ActiveRowException
      */
-    public function setTable(NetteDatabaseSelection $selection)
+    public function setTable(NetteDatabaseSelection $selection): void
     {
         throw new ActiveRowException('Internal IRow interface method');
     }
@@ -71,7 +73,7 @@ class ActiveRow implements IteratorAggregate, IRow
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->record;
     }
@@ -79,7 +81,7 @@ class ActiveRow implements IteratorAggregate, IRow
     /**
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->record->toArray();
     }
@@ -97,7 +99,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param bool|true $need
      * @return string
      */
-    public function getSignature($need = true)
+    public function getSignature($need = true): string
     {
         return $this->record->getSignature($need);
     }
@@ -106,7 +108,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param array|\Traversable $data
      * @return bool
      */
-    public function update($data)
+    public function update($data): bool
     {
         return $this->record->update($data);
     }
@@ -114,7 +116,7 @@ class ActiveRow implements IteratorAggregate, IRow
     /**
      * @return int
      */
-    public function delete()
+    public function delete(): int
     {
         return $this->record->delete();
     }
@@ -125,10 +127,10 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param string $throughColumn
      * @return ActiveRow|null
      */
-    public function ref($key, $throughColumn = null)
+    public function ref($key, $throughColumn = null): ?ActiveRow
     {
         $row = $this->record->ref($key, $throughColumn);
-        return $row instanceof IRow ? $this->prepareRecord($row) : $row;
+        return $row instanceof IRow ? $this->prepareRecord($row) : null;
     }
 
 
@@ -136,12 +138,12 @@ class ActiveRow implements IteratorAggregate, IRow
      * Returns referencing rows
      * @param string $key
      * @param string $throughColumn
-     * @return mixed
+     * @return Selection
      */
-    public function related($key, $throughColumn = null)
+    public function related($key, $throughColumn = null): ?Selection
     {
         $selection = $this->record->related($key, $throughColumn);
-        return $selection instanceof NetteDatabaseSelection ? $this->prepareSelection($selection) : $selection;
+        return $selection instanceof NetteDatabaseSelection ? $this->prepareSelection($selection) : null;
     }
 
     /**********************************************************************\
@@ -151,7 +153,7 @@ class ActiveRow implements IteratorAggregate, IRow
     /**
      * @return ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): ArrayIterator
     {
         return $this->record->getIterator();
     }
@@ -163,7 +165,7 @@ class ActiveRow implements IteratorAggregate, IRow
     /**
      * Returns value of column
      * @param string $key  column name
-     * @return string
+     * @return mixed
      */
     public function offsetGet($key)
     {
@@ -175,7 +177,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param string $key   column name
      * @return bool
      */
-    public function offsetExists($key)
+    public function offsetExists($key): bool
     {
         return $this->record->offsetExists($key);
     }
@@ -186,7 +188,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param string $value
      * @throws DeprecatedException
      */
-    public function offsetSet($key, $value)
+    public function offsetSet($key, $value): void
     {
         $this->record->offsetSet($key, $value);
     }
@@ -196,7 +198,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param string $key column name
      * @throws DeprecatedException
      */
-    public function offsetUnset($key)
+    public function offsetUnset($key): void
     {
         $this->record->offsetUnset($key);
     }
@@ -212,7 +214,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param string $refPrimary
      * @return array
      */
-    protected function mmRelated(Selection $selection, $ref, $refPrimary = 'id')
+    protected function mmRelated(Selection $selection, string $ref, string $refPrimary = 'id'): array
     {
         $result = [];
         foreach ($selection as $row) {
@@ -230,7 +232,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param IRow $row
      * @return ActiveRow
      */
-    protected function prepareRecord(IRow $row)
+    protected function prepareRecord(IRow $row): ActiveRow
     {
         $recordClass = $this->structure->getActiveRowClass($row->getTable()->getName());
         return new $recordClass($row, $this->structure);
@@ -241,7 +243,7 @@ class ActiveRow implements IteratorAggregate, IRow
      * @param NetteDatabaseSelection $selection
      * @return Selection
      */
-    protected function prepareSelection(NetteDatabaseSelection $selection)
+    protected function prepareSelection(NetteDatabaseSelection $selection): Selection
     {
         $selectionClass = $this->structure->getSelectionClass($selection->getName());
         return new $selectionClass($selection, $this->structure);

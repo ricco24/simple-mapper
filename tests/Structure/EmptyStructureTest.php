@@ -38,10 +38,8 @@ class EmptyStructureTest extends TestBase
     public function testFluentInterface()
     {
         $structure = new EmptyStructure();
-        $structure->registerActiveRowClass('table1', 'row class table 1')
-            ->registerSelectionClass('table1', 'select class table 1')
-            ->registerActiveRowClass('table2', 'row class table 2')
-            ->registerSelectionClass('table2', 'select class table 2');
+        $this->assertInstanceOf(EmptyStructure::class, $structure->registerActiveRowClass('table1', 'row class table 1'));
+        $this->assertInstanceOf(EmptyStructure::class,  $structure->registerActiveRowClass('table2', 'row class table 2'));
     }
 
     public function testScopes()

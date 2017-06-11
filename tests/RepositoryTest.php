@@ -68,7 +68,7 @@ class RepositoryTest extends TestBase
         $deleteResult = $repository->delete($product);
 
         $this->assertTrue($deleteResult);
-        $this->assertFalse($repository->findAll()->wherePrimary(3)->fetch());
+        $this->assertNull($repository->findAll()->wherePrimary(3)->fetch());
     }
 
     public function testScopes()

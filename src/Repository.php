@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleMapper;
 
 use Nette\Database\Context;
@@ -47,7 +49,7 @@ abstract class Repository
     /**
      * @param Structure $structure
      */
-    public function setStructure(Structure $structure)
+    public function setStructure(Structure $structure): void
     {
         $this->structure = $structure;
         if (count($this->getScopes())) {

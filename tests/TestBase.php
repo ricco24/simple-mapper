@@ -21,13 +21,14 @@ use Kelemen\SimpleMapper\Tests\Mock\Repository\StickersRepository;
 use Kelemen\SimpleMapper\Tests\Mock\Selection\ProductCategories;
 use Kelemen\SimpleMapper\Tests\Mock\Selection\Products;
 use Kelemen\SimpleMapper\Tests\Mock\Selection\ProductTypes;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use DatabaseConnection;
+use SimpleMapper\ActiveRow;
 use SimpleMapper\Mapper;
 use SimpleMapper\Selection;
 use SimpleMapper\Structure\BaseStructure;
 
-class TestBase extends PHPUnit_Framework_TestCase
+class TestBase extends TestCase
 {
     /** @var ProductsRepository */
     protected $productsRepository;
@@ -46,7 +47,7 @@ class TestBase extends PHPUnit_Framework_TestCase
     /**
      * Fetch one product
      * @param int $id
-     * @return Product
+     * @return Product|ActiveRow
      */
     protected function getProduct($id)
     {
