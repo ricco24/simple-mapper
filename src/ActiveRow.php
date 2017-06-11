@@ -169,7 +169,8 @@ class ActiveRow implements IteratorAggregate, IRow
      */
     public function offsetGet($key)
     {
-        return $this->record->offsetGet($key);
+        $result = $this->record->offsetGet($key);
+        return $result instanceof IRow ? $this->prepareRecord($result) : $result;
     }
 
     /**
