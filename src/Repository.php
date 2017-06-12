@@ -66,6 +66,16 @@ abstract class Repository
     }
 
     /**
+     * Prefix given string (column name) with table name
+     * @param string $column
+     * @return string
+     */
+    public static function prefixColumn(string $column): string
+    {
+        return static::getTableName() . '.' . $column;
+    }
+
+    /**
      * @return Context
      */
     public function getDatabaseContext(): Context
