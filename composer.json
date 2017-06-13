@@ -19,5 +19,8 @@
     },
     "autoload": {
         "classmap": ["src/"] 
+    },
+    "suggest": {
+        "ramsey/uuid": "For Uuid4Behaviour"
     }
 }
