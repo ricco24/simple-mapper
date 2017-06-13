@@ -13,6 +13,7 @@ abstract class AbstractBehaviour implements Behaviour
      */
     public function beforeInsert(array $data): array
     {
+        return $data;
     }
 
     /**
@@ -27,6 +28,7 @@ abstract class AbstractBehaviour implements Behaviour
      */
     public function beforeUpdate(ActiveRow $record, array $data): array
     {
+        return $data;
     }
 
     /**
