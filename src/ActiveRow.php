@@ -21,6 +21,9 @@ class ActiveRow implements IteratorAggregate, IRow
     /** @var Structure */
     protected $structure;
 
+    /** @var ActiveRow|null */
+    protected $referencingRecord;
+
     /**
      * @param NetteDatabaseActiveRow $record
      * @param Structure $structure
@@ -130,9 +133,14 @@ class ActiveRow implements IteratorAggregate, IRow
     public function ref($key, $throughColumn = null): ?ActiveRow
     {
         $row = $this->record->ref($key, $throughColumn);
-        return $row instanceof IRow ? $this->prepareRecord($row) : null;
-    }
+        if($row instanceof IRow) {
+            $result = $this->prepareRecord($row);
+            $result->setReferencingRecord($this);
+            return $result;
+        }
 
+        return null;
+    }
 
     /**
      * Returns referencing rows
@@ -207,6 +215,22 @@ class ActiveRow implements IteratorAggregate, IRow
     /**********************************************************************\
      * Extend methods
     \**********************************************************************/
+
+    /**
+     * @param ActiveRow $row
+     */
+    public function setReferencingRecord(ActiveRow $row): void
+    {
+        $this->referencingRecord = $row;
+    }
+
+    /**
+     * @return null|ActiveRow
+     */
+    public function getReferencingRecord(): ?ActiveRow
+    {
+        return $this->referencingRecord;
+    }
 
     /**
      * Returns mm referencing rows

@@ -5,6 +5,7 @@
 - Repository class
 - Behaviours
 - Scopes
+- ActiveRow has referencingRecord
 
 #### Changed
 - Add PHP 7.1 support only (BC break)
