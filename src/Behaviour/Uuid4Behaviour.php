@@ -8,21 +8,13 @@ use Ramsey\Uuid\Uuid;
 
 class Uuid4Behaviour extends AbstractBehaviour
 {
-    /** @var string */
-    private $field;
+    private string $field;
 
-    /**
-     * @param string $field
-     */
     public function __construct(string $field = 'id')
     {
         $this->field = $field;
     }
 
-    /**
-     * @param array $data
-     * @return array
-     */
     public function beforeInsert(array $data): array
     {
         if (!array_key_exists($this->field, $data) || !$data[$this->field]) {
