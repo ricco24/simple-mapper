@@ -31,19 +31,23 @@ abstract class Repository
 
     protected static string $tableName = 'unknown';
 
-    public function __construct(Explorer $databaseExplorer)
+    public function __construct(Explorer $databaseExplorer, ?Structure $structure = null)
     {
         $this->databaseExplorer = $databaseExplorer;
-        $this->structure = new EmptyStructure();
+        $this->structure = $this->configureStructure($structure);
         $this->configure();
     }
 
-    public function setStructure(Structure $structure): void
+    private function configureStructure(?Structure $structure): Structure
     {
-        $this->structure = $structure;
-        if (count($this->getScopes())) {
-            $this->structure->registerScopes(static::getTableName(), $this->getScopes());
+        if ($structure === null) {
+            return new EmptyStructure();
         }
+
+        if (count($this->getScopes())) {
+            $structure->registerScopes(static::getTableName(), $this->getScopes());
+        }
+        return $structure;
     }
 
     public static function getTableName(): string

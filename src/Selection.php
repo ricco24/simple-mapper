@@ -336,7 +336,7 @@ class Selection implements Iterator, IRowContainer, ArrayAccess, Countable
     /**
      * @return string|int Row ID
      */
-    public function key()
+    public function key(): mixed
     {
         return $this->selection->key();
     }
