@@ -47,12 +47,7 @@ class Selection implements Iterator, IRowContainer, ArrayAccess, Countable
         $this->selection = clone $this->selection;
     }
 
-    /**
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     */
-    public function __call($name, array $arguments)
+    public function __call(string $name, array $arguments): self
     {
         if (str_starts_with($name, 'scope')) {
             $scopeName = lcfirst(substr($name, 5));
@@ -95,10 +90,9 @@ class Selection implements Iterator, IRowContainer, ArrayAccess, Countable
 
     /**
      * Fetches all rows as associative array.
-     * @param  string|int  $key  column name used for an array key or null for numeric index
-     * @param  string|int  $value  column name used for an array value or null for the whole row
+     * @return array<scalar, mixed>
      */
-    public function fetchPairs($key = null, $value = null): array
+    public function fetchPairs(string|int $key = null, string|int $value = null): array
     {
         $result = [];
 
@@ -153,7 +147,7 @@ class Selection implements Iterator, IRowContainer, ArrayAccess, Countable
      * Adds where condition, more calls appends with AND.
      * @param  string|array  $condition  possibly containing ?
      */
-    public function where($condition, ...$params): Selection
+    public function where(string|array $condition, ...$params): Selection
     {
         $this->selection->where($condition, ...$params);
         return $this;

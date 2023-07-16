@@ -10,16 +10,6 @@ use SimpleMapper\Scope\Scope;
 interface Structure
 {
     /**
-     * Register new active row class for table
-     */
-    public function registerActiveRowClass(string $tableName, string $activeRowClass): Structure;
-
-    /**
-     * Register new selection class for table
-     */
-    public function registerSelectionClass(string $tableName, string $selectionClass): Structure;
-
-    /**
      * Register new scopes for table
      * @throws SimpleMapperException
      */

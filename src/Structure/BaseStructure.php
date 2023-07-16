@@ -11,20 +11,30 @@ use SimpleMapper\Selection;
 
 class BaseStructure implements Structure
 {
-    protected array $data = [];
+    /** @var array<string, string> */
+    private array $activeRows = [];
 
-    public function registerActiveRowClass(string $tableName, string $activeRowClass): Structure
+    /** @var array<string, string> */
+    private array $selections = [];
+
+    /** @var array<string, array<string, Scope>> */
+    private array $scopes = [];
+
+    public function registerMapping(string $tableName, ?string $activeRowClass, ?string $selectionClass): Structure
     {
-        $this->data[$tableName]['row'] = $activeRowClass;
+        if ($activeRowClass !== null) {
+            $this->activeRows[$tableName] = $activeRowClass;
+        }
+        if ($selectionClass !== null) {
+            $this->selections[$tableName] = $selectionClass;
+        }
         return $this;
     }
 
-    public function registerSelectionClass(string $tableName, string $selectionClass): Structure
-    {
-        $this->data[$tableName]['selection'] = $selectionClass;
-        return $this;
-    }
-
+    /**
+     * @param Scope[] $scopes
+     * @throws SimpleMapperException
+     */
     public function registerScopes(string $tableName, array $scopes): Structure
     {
         foreach ($scopes as $scope) {
@@ -32,28 +42,31 @@ class BaseStructure implements Structure
                 throw new SimpleMapperException('Scopes can be only of class ' . Scope::class);
             }
 
-            $this->data[$tableName]['scopes'][$scope->getName()] = $scope;
+            $this->scopes[$tableName][$scope->getName()] = $scope;
         }
         return $this;
     }
 
     public function getActiveRowClass(string $tableName): string
     {
-        return $this->data[$tableName]['row'] ?? ActiveRow::class;
+        return $this->activeRows[$tableName] ?? ActiveRow::class;
     }
 
     public function getSelectionClass(string $tableName): string
     {
-        return $this->data[$tableName]['selection'] ?? Selection::class;
+        return $this->selections[$tableName] ?? Selection::class;
     }
 
+    /**
+     * @return Scope[]
+     */
     public function getScopes(string $tableName): array
     {
-        return $this->data[$tableName]['scopes'] ?? [];
+        return $this->scopes[$tableName] ?? [];
     }
 
     public function getScope(string $tableName, string $scope): ?Scope
     {
-        return $this->data[$tableName]['scopes'][$scope] ?? null;
+        return $this->scopes[$tableName][$scope] ?? null;
     }
 }
