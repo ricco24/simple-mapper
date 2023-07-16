@@ -11,6 +11,7 @@ interface Structure
 {
     /**
      * Register new scopes for table
+     * @param Scope[] $scopes
      * @throws SimpleMapperException
      */
     public function registerScopes(string $tableName, array $scopes): Structure;
@@ -27,6 +28,7 @@ interface Structure
 
     /**
      * Returns all scopes registered for table
+     * @return Scope[]
      */
     public function getScopes(string $tableName): array;
 
