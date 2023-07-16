@@ -15,6 +15,7 @@
         "nette/database": "~3.1"
     },
     "require-dev": {
+        "ramsey/uuid": "^4.7",
         "phpunit/phpunit": "^9.5",
         "squizlabs/php_codesniffer": "^3.0"
     },
