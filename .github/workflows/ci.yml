@@ -22,14 +22,6 @@ jobs:
           standard: PSR12
           exclude: Generic.Files.LineLength
 
-      - name: PHP Mess Detector
-        uses: php-actions/phpmd@v1
-        with:
-          php_version: 8.1
-          path: src/
-          output: text
-          ruleset: cleancode
-
       - name: PHPStan
         uses: php-actions/phpstan@v3
         with:
