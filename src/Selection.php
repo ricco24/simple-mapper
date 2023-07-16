@@ -4,40 +4,35 @@ declare(strict_types=1);
 
 namespace SimpleMapper;
 
-use Nette\Database\Table\IRow;
-use Nette\Database\Table\Selection as NetteDatabaseSelection;
-use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
-use Nette\InvalidArgumentException;
 use ArrayAccess;
-use Iterator;
 use Countable;
+use Iterator;
+use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
+use Nette\Database\Table\IRowContainer;
+use Nette\Database\Table\Selection as NetteDatabaseSelection;
+use Nette\InvalidArgumentException;
 use SimpleMapper\Structure\Structure;
-use Traversable;
 
-class Selection implements Iterator, Countable, ArrayAccess
+class Selection implements Iterator, IRowContainer, ArrayAccess, Countable
 {
-    /** @var NetteDatabaseSelection */
-    private $selection;
+    private NetteDatabaseSelection $selection;
 
-    /** @var Structure */
-    protected $structure;
+    protected Structure $structure;
 
-    /**
-     * @param NetteDatabaseSelection $selection
-     * @param Structure $structure
-     */
     public function __construct(NetteDatabaseSelection $selection, Structure $structure)
     {
         $this->selection = $selection;
         $this->structure = $structure;
     }
 
-    /**
-     * @return NetteDatabaseSelection
-     */
     public function getSelection(): NetteDatabaseSelection
     {
         return $this->selection;
+    }
+
+    public function getName(): string
+    {
+        return $this->selection->getName();
     }
 
     /********************************************************************\
@@ -59,11 +54,14 @@ class Selection implements Iterator, Countable, ArrayAccess
      */
     public function __call($name, array $arguments)
     {
-        if (substr($name, 0, 5) === 'scope') {
+        if (str_starts_with($name, 'scope')) {
             $scopeName = lcfirst(substr($name, 5));
             $scope = $this->structure->getScope($this->selection->getName(), $scopeName);
             if (!$scope) {
-                trigger_error('Scope ' . $scopeName . ' is not defined for table ' . $this->selection->getName(), E_USER_ERROR);
+                trigger_error(
+                    'Scope ' . $scopeName . ' is not defined for table ' . $this->selection->getName(),
+                    E_USER_ERROR
+                );
             }
             return $this->where(call_user_func_array($scope->getCallback(), $arguments));
         }
@@ -75,21 +73,12 @@ class Selection implements Iterator, Countable, ArrayAccess
      * Wrapper function - fetch
     \**********************************************************************/
 
-    /**
-     * Returns row specified by primary key
-     * @param mixed $key Primary key
-     * @return ActiveRow|null
-     */
-    public function get($key): ?ActiveRow
+    public function get(mixed $key): ?ActiveRow
     {
         $row = $this->selection->get($key);
         return $row instanceof NetteDatabaseActiveRow ? $this->prepareRecord($row) : null;
     }
 
-    /**
-     * Returns one record
-     * @return ActiveRow|null
-     */
     public function fetch(): ?ActiveRow
     {
         $row = $this->selection->fetch();
@@ -97,20 +86,17 @@ class Selection implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * Fetches single field
-     * @param string|null $column
-     * @return mixed
+     * @deprecated
      */
-    public function fetchField(string $column = null)
+    public function fetchField(?string $column = null): mixed
     {
         return $this->selection->fetchField($column);
     }
 
     /**
-     * Fetch key => value pairs
-     * @param mixed $key
-     * @param mixed $value
-     * @return array
+     * Fetches all rows as associative array.
+     * @param  string|int  $key  column name used for an array key or null for numeric index
+     * @param  string|int  $value  column name used for an array value or null for the whole row
      */
     public function fetchPairs($key = null, $value = null): array
     {
@@ -124,8 +110,8 @@ class Selection implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * Returns all records
-     * @return array
+     * Fetches all rows.
+     * @return NetteDatabaseActiveRow[]
      */
     public function fetchAll(): array
     {
@@ -133,13 +119,13 @@ class Selection implements Iterator, Countable, ArrayAccess
     }
 
     /**
+     * Fetches all rows and returns associative tree.
      * Some examples of usage: https://github.com/nette/utils/blob/master/tests%2FUtils%2FArrays.associate().phpt
-     * @param mixed $path
-     * @return array|\stdClass
+     * @param  string  $path  associative descriptor
      */
-    public function fetchAssoc($path)
+    public function fetchAssoc(string $path): array
     {
-        return $this->selection->fetchAssoc($path);
+        return $this->prepareRecords($this->selection->fetchAssoc($path));
     }
 
     /**********************************************************************\
@@ -147,10 +133,9 @@ class Selection implements Iterator, Countable, ArrayAccess
     \**********************************************************************/
 
     /**
-     * Adds select clause, more calls appends to the end
-     * @param string $columns   for example "column, MD5(column) AS column_md5"
-     * @param mixed ...$params
-     * @return Selection
+     * Adds select clause, more calls appends to the end.
+     * @param  string|string[]  $columns  for example "column, MD5(column) AS column_md5"
+     * @return static
      */
     public function select($columns, ...$params): Selection
     {
@@ -158,22 +143,15 @@ class Selection implements Iterator, Countable, ArrayAccess
         return $this;
     }
 
-    /**
-     * Adds condition for primary key
-     * @param mixed $key
-     * @return Selection
-     */
-    public function wherePrimary($key): Selection
+    public function wherePrimary(mixed $key): Selection
     {
         $this->selection->wherePrimary($key);
         return $this;
     }
 
     /**
-     * Adds where condition, more calls appends with AND
-     * @param string|string[] $condition
-     * @param mixed ...$params
-     * @return Selection
+     * Adds where condition, more calls appends with AND.
+     * @param  string|array  $condition  possibly containing ?
      */
     public function where($condition, ...$params): Selection
     {
@@ -182,13 +160,11 @@ class Selection implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * Adds ON condition when joining specified table, more calls appends with AND
-     * @param string $tableChain    table chain or table alias for which you need additional left join condition
-     * @param string|string[] $condition     condition possibly containing ?
-     * @param mixed ...$params
-     * @return Selection
+     * Adds ON condition when joining specified table, more calls appends with AND.
+     * @param  string  $tableChain  table chain or table alias for which you need additional left join condition
+     * @param  string  $condition  possibly containing ?
      */
-    public function joinWhere(string $tableChain, $condition, ...$params): Selection
+    public function joinWhere(string $tableChain, string $condition, ...$params): Selection
     {
         $this->selection->joinWhere($tableChain, $condition, ...$params);
         return $this;
@@ -208,10 +184,8 @@ class Selection implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * Adds order clause, more calls appends to the end
-     * @param string $columns       for example 'column1, column2 DESC'
-     * @param mixed ...$params
-     * @return Selection
+     * Adds order clause, more calls appends to the end.
+     * @param  string  $columns  for example 'column1, column2 DESC'
      */
     public function order(string $columns, ...$params): Selection
     {
@@ -220,12 +194,9 @@ class Selection implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * Sets limit clause, more calls rewrite old values
-     * @param int $limit
-     * @param int $offset
-     * @return Selection
+     * Sets limit clause, more calls rewrite old values.
      */
-    public function limit(int $limit, int $offset = null): Selection
+    public function limit(?int $limit, ?int $offset = null): Selection
     {
         $this->selection->limit($limit, $offset);
         return $this;
@@ -233,12 +204,8 @@ class Selection implements Iterator, Countable, ArrayAccess
 
     /**
      * Sets offset using page number, more calls rewrite old values
-     * @param int $page
-     * @param int $itemsPerPage
-     * @param int|null $numOfPages
-     * @return Selection
      */
-    public function page(int $page, int $itemsPerPage, int & $numOfPages = null): Selection
+    public function page(int $page, int $itemsPerPage, int &$numOfPages = null): Selection
     {
         $this->selection->page($page, $itemsPerPage, $numOfPages);
         return $this;
@@ -246,9 +213,6 @@ class Selection implements Iterator, Countable, ArrayAccess
 
     /**
      * Sets group clause, more calls rewrite old value
-     * @param string $columns
-     * @param mixed ...$params
-     * @return Selection
      */
     public function group(string $columns, ...$params): Selection
     {
@@ -258,9 +222,6 @@ class Selection implements Iterator, Countable, ArrayAccess
 
     /**
      * Sets having clause, more calls rewrite old value
-     * @param string $having
-     * @param mixed ...$params
-     * @return Selection
      */
     public function having(string $having, ...$params): Selection
     {
@@ -270,9 +231,6 @@ class Selection implements Iterator, Countable, ArrayAccess
 
     /**
      * Aliases table. Example ':book:book_tag.tag', 'tg'
-     * @param string $tableChain
-     * @param string $alias
-     * @return Selection
      */
     public function alias(string $tableChain, string $alias): Selection
     {
@@ -285,30 +243,25 @@ class Selection implements Iterator, Countable, ArrayAccess
     \**********************************************************************/
 
     /**
-     * Executes aggregation function
-     * @param string $function Select call in "FUNCTION(column)" format
-     * @return float
+     * Executes aggregation function.
+     * @param  string  $function  select call in "FUNCTION(column)" format
      */
-    public function aggregation(string $function): float
+    public function aggregation(string $function, ?string $groupFunction = null): float
     {
-        return (float) $this->selection->aggregation($function);
+        return (float) $this->selection->aggregation($function, $groupFunction);
     }
 
     /**
-     * Counts number of rows
-     * Countable interface
-     * @param string $column If it is not provided returns count of result rows, otherwise runs new sql counting query
-     * @return int
+     * Counts number of rows.
+     * @param ?string $column  if it is not provided returns count of result rows, otherwise runs new sql counting query
      */
-    public function count(string $column = null): int
+    public function count(?string $column = null): int
     {
-        return (int) $this->selection->count($column);
+        return $this->selection->count($column);
     }
 
     /**
-     * Returns minimum value from a column
-     * @param string $column
-     * @return float
+     * Returns minimum value from a column.
      */
     public function min(string $column): float
     {
@@ -316,9 +269,7 @@ class Selection implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * Returns maximum value from a column
-     * @param string $column
-     * @return float
+     * Returns maximum value from a column.
      */
     public function max(string $column): float
     {
@@ -327,8 +278,6 @@ class Selection implements Iterator, Countable, ArrayAccess
 
     /**
      * Returns sum of values in a column
-     * @param string $column
-     * @return float
      */
     public function sum(string $column): float
     {
@@ -340,29 +289,29 @@ class Selection implements Iterator, Countable, ArrayAccess
     \**********************************************************************/
 
     /**
-     * Inserts row in a table
-     * @param  array|Traversable|Selection $data
-     * @return IRow|int|bool
+     * Inserts row in a table.
+     * @param  array|\Traversable|Selection  $data  [$column => $value]|\Traversable|Selection for INSERT ... SELECT
+     * @return ActiveRow|int|bool Returns ActiveRow or number of affected rows for Selection or table without primary key
      */
-    public function insert($data)
+    public function insert(iterable $data)
     {
         $insertResult = $this->selection->insert($data);
-        return $insertResult instanceof IRow ? $this->prepareRecord($insertResult) : $insertResult;
+        return $insertResult instanceof NetteDatabaseActiveRow ? $this->prepareRecord($insertResult) : $insertResult;
     }
 
     /**
-     * Updates all rows in result set
-     * @param  array|Traversable $data ($column => $value)
-     * @return int
+     * Updates all rows in result set.
+     * Joins in UPDATE are supported only in MySQL
+     * @return int number of affected rows
      */
-    public function update($data): int
+    public function update(iterable $data): int
     {
         return $this->selection->update($data);
     }
 
     /**
-     * Deletes all rows in result set
-     * @return int
+     * Deletes all rows in result set.
+     * @return int number of affected rows
      */
     public function delete(): int
     {
@@ -373,45 +322,33 @@ class Selection implements Iterator, Countable, ArrayAccess
      * Iterator interface
     \**********************************************************************/
 
-    /**
-     * Rewind selection
-     */
     public function rewind(): void
     {
         $this->selection->rewind();
     }
 
     /**
-     * Returns current selection data record
      * @return ActiveRow|null
      */
     public function current(): ?ActiveRow
     {
         $row = $this->selection->current();
-        return $row instanceof IRow ? $this->prepareRecord($row) : null;
+        return $row instanceof NetteDatabaseActiveRow ? $this->prepareRecord($row) : null;
     }
 
     /**
-     * Returns current selection data key
      * @return string|int Row ID
      */
-    public function key()
+    public function key(): mixed
     {
         return $this->selection->key();
     }
 
-    /**
-     * Move iterator
-     */
     public function next(): void
     {
         $this->selection->next();
     }
 
-    /**
-     * It is selection valid
-     * @return bool
-     */
     public function valid(): bool
     {
         return $this->selection->valid();
@@ -421,40 +358,22 @@ class Selection implements Iterator, Countable, ArrayAccess
      * ArrayAccess interface
     \**********************************************************************/
 
-    /**
-     * @param string $key Row ID
-     * @param IRow $value
-     */
     public function offsetSet($key, $value): void
     {
         $this->selection->offsetSet($key, $value);
     }
 
-    /**
-     * Returns specified row
-     * @param string $key Row ID
-     * @return ActiveRow|null
-     */
     public function offsetGet($key): ?ActiveRow
     {
         $row = $this->selection->offsetGet($key);
-        return $row instanceof IRow ? $this->prepareRecord($row) : null;
+        return $row instanceof NetteDatabaseActiveRow ? $this->prepareRecord($row) : null;
     }
 
-    /**
-     * Tests if row exists
-     * @param string $key Row ID
-     * @return bool
-     */
     public function offsetExists($key): bool
     {
         return $this->selection->offsetExists($key);
     }
 
-    /**
-     * Removes row from result set
-     * @param string $key Row ID
-     */
     public function offsetUnset($key): void
     {
         $this->selection->offsetUnset($key);
@@ -464,22 +383,12 @@ class Selection implements Iterator, Countable, ArrayAccess
      * Build methods
     \**********************************************************************/
 
-    /**
-     * Prepare one record
-     * @param IRow $row
-     * @return ActiveRow
-     */
-    protected function prepareRecord(IRow $row): ActiveRow
+    protected function prepareRecord(NetteDatabaseActiveRow $row): ActiveRow
     {
         $recordClass = $this->structure->getActiveRowClass($row->getTable()->getName());
         return new $recordClass($row, $this->structure);
     }
 
-    /**
-     * Prepare records array
-     * @param array $rows
-     * @return array
-     */
     protected function prepareRecords(array $rows): array
     {
         $result = [];

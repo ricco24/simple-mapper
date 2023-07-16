@@ -8,11 +8,9 @@ use SimpleMapper\Structure\Structure;
 
 class Mapper
 {
-    /** @var Structure */
-    private $structure;
+    private Structure $structure;
 
-    /** @var array */
-    private $repositories = [];
+    private array $repositories = [];
 
     /**
      * @param Structure $structure
@@ -24,13 +22,12 @@ class Mapper
 
     /**
      * Map classes and scopes by repository
-     * @param Repository $repository
-     * @param string|null $activeRowClass
-     * @param string|null $selectionClass
-     * @return Mapper
      */
-    public function mapRepository(Repository $repository, string $activeRowClass = null, string $selectionClass = null): Mapper
-    {
+    public function mapRepository(
+        Repository $repository,
+        ?string $activeRowClass = null,
+        ?string $selectionClass = null
+    ): Mapper {
         $this->repositories[get_class($repository)] = $repository;
         $repository->setStructure($this->structure);
 
@@ -47,13 +44,12 @@ class Mapper
 
     /**
      * Map classes only by table name
-     * @param string $tableName
-     * @param string|null $activeRowClass
-     * @param string|null $selectionClass
-     * @return Mapper
      */
-    public function mapTableName(string $tableName, string $activeRowClass = null, string $selectionClass = null): Mapper
-    {
+    public function mapTableName(
+        string $tableName,
+        string $activeRowClass = null,
+        string $selectionClass = null
+    ): Mapper {
         if ($activeRowClass) {
             $this->structure->registerActiveRowClass($tableName, $activeRowClass);
         }
@@ -65,10 +61,6 @@ class Mapper
         return $this;
     }
 
-    /**
-     * @param string $class
-     * @return null|Repository
-     */
     public function getRepository(string $class): ?Repository
     {
         return $this->repositories[$class] ?? null;

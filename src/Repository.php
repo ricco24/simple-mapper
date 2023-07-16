@@ -4,62 +4,52 @@ declare(strict_types=1);
 
 namespace SimpleMapper;
 
-use Nette\Database\Context;
+use Exception;
 use Nette\Database\DriverException;
+use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow as NetteDatabaseActiveRow;
 use Nette\Database\Table\Selection as NetteDatabaseSelection;
+use PDOException;
 use SimpleMapper\Behaviour\Behaviour;
 use SimpleMapper\Exception\RepositoryException;
 use SimpleMapper\Structure\EmptyStructure;
 use SimpleMapper\Structure\Structure;
-use Traversable;
-use Exception;
-use PDOException;
 
 /**
  * Base repository class
  */
 abstract class Repository
 {
-    /** @var Context */
-    protected $databaseContext;
+    protected Explorer $databaseExplorer;
 
-    /** @var Structure|null */
-    protected $structure;
+    protected ?Structure $structure;
 
-    /** @var string             Soft delete field, if empty soft delete is disabled */
-    protected $softDelete = '';
+    /** Soft delete field, if empty soft delete is disabled */
+    protected string $softDelete = '';
 
-    /** @var array */
-    private $behaviours = [];
+    private array $behaviours = [];
 
-    /** @var string */
-    protected static $tableName = 'unknown';
+    protected static string $tableName = 'unknown';
 
-    /**
-     * @param Context $databaseContext
-     */
-    public function __construct(Context $databaseContext)
+    public function __construct(Explorer $databaseExplorer, ?Structure $structure = null)
     {
-        $this->databaseContext = $databaseContext;
-        $this->structure = new EmptyStructure();
+        $this->databaseExplorer = $databaseExplorer;
+        $this->structure = $this->configureStructure($structure);
         $this->configure();
     }
 
-    /**
-     * @param Structure $structure
-     */
-    public function setStructure(Structure $structure): void
+    private function configureStructure(?Structure $structure): Structure
     {
-        $this->structure = $structure;
-        if (count($this->getScopes())) {
-            $this->structure->registerScopes(static::getTableName(), $this->getScopes());
+        if ($structure === null) {
+            return new EmptyStructure();
         }
+
+        if (count($this->getScopes())) {
+            $structure->registerScopes(static::getTableName(), $this->getScopes());
+        }
+        return $structure;
     }
 
-    /**
-     * @return string
-     */
     public static function getTableName(): string
     {
         return static::$tableName;
@@ -67,20 +57,15 @@ abstract class Repository
 
     /**
      * Prefix given string (column name) with table name
-     * @param string $column
-     * @return string
      */
     public static function prefixColumn(string $column): string
     {
         return static::getTableName() . '.' . $column;
     }
 
-    /**
-     * @return Context
-     */
-    public function getDatabaseContext(): Context
+    public function getDatabaseExplorer(): Explorer
     {
-        return $this->databaseContext;
+        return $this->databaseExplorer;
     }
 
     /********************************************************************\
@@ -88,14 +73,11 @@ abstract class Repository
     \********************************************************************/
 
     /**
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
      * @throws RepositoryException
      */
-    public function __call(string $name, array $arguments)
+    public function __call(string $name, array $arguments): mixed
     {
-        if (substr($name, 0, 5) === 'scope') {
+        if (str_starts_with($name, 'scope')) {
             $scopeName = lcfirst(substr($name, 5));
             $scope = $this->structure->getScope(static::$tableName, $scopeName);
             if (!$scope) {
@@ -113,33 +95,16 @@ abstract class Repository
     | Wrapper methods
     \********************************************************************/
 
-    /**
-     * Find all records
-     * @return Selection
-     */
     public function findAll(): Selection
     {
         return $this->prepareSelection($this->getTable());
     }
 
-    /**
-     * Find by conditions
-     * @param array $by
-     * @return Selection
-     */
     public function findBy(array $by): Selection
     {
         return $this->prepareSelection($this->getTable()->where($by));
     }
 
-    /**
-     * Returns all rows as associative array
-     * @param string|null $key
-     * @param string|null $value
-     * @param string|null $order
-     * @param array $where
-     * @return array
-     */
     public function fetchPairs(string $key = null, string $value = null, string $order = null, array $where = []): array
     {
         $result = [];
@@ -155,9 +120,6 @@ abstract class Repository
     }
 
     /**
-     * Insert one record
-     * @param array|Traversable $data
-     * @return ActiveRow|null
      * @throws Exception
      */
     public function insert(array $data): ?ActiveRow
@@ -184,12 +146,6 @@ abstract class Repository
         return $result instanceof NetteDatabaseActiveRow ? $this->prepareRecord($result) : $result;
     }
 
-    /**
-     * Update one record
-     * @param ActiveRow $record
-     * @param array $data
-     * @return ActiveRow|null
-     */
     public function update(ActiveRow $record, array $data): ?ActiveRow
     {
         $result = $this->transaction(function () use ($record, $data) {
@@ -211,14 +167,9 @@ abstract class Repository
         return $result instanceof NetteDatabaseActiveRow ? $this->prepareRecord($result) : $result;
     }
 
-    /**
-     * Delete one record
-     * @param ActiveRow $record
-     * @return bool
-     */
     public function delete(ActiveRow $record): bool
     {
-        $result = $this->transaction(function () use ($record): bool {
+        return $this->transaction(function () use ($record): bool {
             $oldRecord = clone $record;
 
             foreach ($this->behaviours as $behaviour) {
@@ -239,38 +190,24 @@ abstract class Repository
 
             return (bool) $result;
         });
-
-        return $result;
     }
 
     /********************************************************************\
     | Internal methods
     \********************************************************************/
 
-    /**
-     * @return NetteDatabaseSelection
-     */
     protected function getTable(): NetteDatabaseSelection
     {
-        return $this->databaseContext->table(static::getTableName());
+        return $this->databaseExplorer->table(static::getTableName());
     }
 
-    /**
-     * @param Behaviour $behaviour
-     * @return Repository
-     */
     protected function registerBehaviour(Behaviour $behaviour): Repository
     {
         $this->behaviours[get_class($behaviour)] = $behaviour;
         return $this;
     }
 
-    /**
-     * Get behaviour by class
-     * @param string $class
-     * @return Behaviour|null
-     */
-    protected function getBehaviour($class): ?Behaviour
+    protected function getBehaviour(string $class): ?Behaviour
     {
         return $this->behaviours[$class] ?? null;
     }
@@ -297,20 +234,12 @@ abstract class Repository
     | Builder methods
     \********************************************************************/
 
-    /**
-     * @param NetteDatabaseSelection $selection
-     * @return Selection
-     */
     private function prepareSelection(NetteDatabaseSelection $selection): Selection
     {
         $selectionClass = $this->structure->getSelectionClass($selection->getName());
         return new $selectionClass($selection, $this->structure);
     }
 
-    /**
-     * @param NetteDatabaseActiveRow $row
-     * @return ActiveRow
-     */
     private function prepareRecord(NetteDatabaseActiveRow $row): ActiveRow
     {
         $rowClass = $this->structure->getActiveRowClass($row->getTable()->getName());
@@ -323,26 +252,24 @@ abstract class Repository
 
     /**
      * Run new transaction if no transaction is running, do nothing otherwise
-     * @param callable $callback
-     * @return mixed
      */
-    public function transaction(callable $callback)
+    public function transaction(callable $callback): mixed
     {
         try {
             // Check if transaction already running
-            $inTransaction = $this->getDatabaseContext()->getConnection()->getPdo()->inTransaction();
+            $inTransaction = $this->getDatabaseExplorer()->getConnection()->getPdo()->inTransaction();
             if (!$inTransaction) {
-                $this->getDatabaseContext()->beginTransaction();
+                $this->getDatabaseExplorer()->beginTransaction();
             }
 
             $result = $callback($this);
 
             if (!$inTransaction) {
-                $this->getDatabaseContext()->commit();
+                $this->getDatabaseExplorer()->commit();
             }
         } catch (Exception $e) {
             if (isset($inTransaction) && !$inTransaction && $e instanceof PDOException) {
-                $this->getDatabaseContext()->rollBack();
+                $this->getDatabaseExplorer()->rollBack();
             }
             throw $e;
         }
@@ -351,12 +278,9 @@ abstract class Repository
     }
 
     /**
-     * @param callable $callback
-     * @param int $retryTimes
-     * @return mixed
      * @throws DriverException
      */
-    public function ensure(callable $callback, int $retryTimes = 1)
+    public function ensure(callable $callback, int $retryTimes = 1): mixed
     {
         try {
             return $callback($this);
@@ -364,19 +288,16 @@ abstract class Repository
             if ($retryTimes == 0) {
                 throw $e;
             }
-            $this->getDatabaseContext()->getConnection()->reconnect();
+            $this->getDatabaseExplorer()->getConnection()->reconnect();
             return $this->ensure($callback, $retryTimes - 1);
         }
     }
 
     /**
      * Try call callback X times
-     * @param callable $callback
-     * @param int $retryTimes
-     * @return mixed
      * @throws DriverException
      */
-    public function retry(callable $callback, int $retryTimes = 3)
+    public function retry(callable $callback, int $retryTimes = 3): mixed
     {
         try {
             return $callback($this);
@@ -390,11 +311,8 @@ abstract class Repository
 
     /**
      * Paginate callback
-     * @param Selection $selection
-     * @param int $limit
-     * @param callable $callback
      */
-    public function chunk(Selection $selection, int $limit, callable $callback)
+    public function chunk(Selection $selection, int $limit, callable $callback): void
     {
         $count = $selection->count('*');
         $pages = ceil($count / $limit);
