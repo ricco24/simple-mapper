@@ -81,9 +81,7 @@ abstract class Repository
             $scopeName = lcfirst(substr($name, 5));
             $scope = $this->structure->getScope(static::$tableName, $scopeName);
             if (!$scope) {
-                throw new RepositoryException(
-                    'Scope ' . $scopeName . ' is not defined for table ' . static::$tableName
-                );
+                throw new RepositoryException('Scope ' . $scopeName . ' is not defined for table ' . static::$tableName);
             }
 
             $scopeNameToCall = 'scope' . ucfirst($scope->getName());

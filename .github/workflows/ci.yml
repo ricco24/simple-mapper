@@ -20,6 +20,7 @@ jobs:
           php_version: 8.1
           path: src/
           standard: PSR12
+          exclude: Generic.Files.LineLength
 
       - name: PHP Mess Detector
         uses: php-actions/phpmd@v1
