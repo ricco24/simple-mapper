@@ -28,6 +28,7 @@ jobs:
           php_version: 8.1
           path: src/
           output: text
+          ruleset: cleancode
 
       - name: PHPStan
         uses: php-actions/phpstan@v3
