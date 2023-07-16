@@ -19,7 +19,7 @@ jobs:
         with:
           php_version: 8.1
           path: src/
-          standard: phpcs.xml
+          standard: PSR12
 
       - name: PHP Mess Detector
         uses: php-actions/phpmd@v1
