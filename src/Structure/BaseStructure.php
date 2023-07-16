@@ -20,6 +20,10 @@ class BaseStructure implements Structure
     /** @var array<string, array<string, Scope>> */
     private array $scopes = [];
 
+    /**
+     * @param class-string<ActiveRow>|null $activeRowClass
+     * @param class-string<Selection>|null $selectionClass
+     */
     public function registerMapping(string $tableName, ?string $activeRowClass, ?string $selectionClass): Structure
     {
         if ($activeRowClass !== null) {

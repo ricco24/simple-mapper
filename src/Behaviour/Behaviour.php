@@ -11,6 +11,7 @@ interface Behaviour
     /**
      * Transform data before insert
      * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
     public function beforeInsert(array $data): array;
 

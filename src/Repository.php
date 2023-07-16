@@ -12,6 +12,7 @@ use Nette\Database\Table\Selection as NetteDatabaseSelection;
 use PDOException;
 use SimpleMapper\Behaviour\Behaviour;
 use SimpleMapper\Exception\RepositoryException;
+use SimpleMapper\Scope\Scope;
 use SimpleMapper\Structure\EmptyStructure;
 use SimpleMapper\Structure\Structure;
 
@@ -22,11 +23,12 @@ abstract class Repository
 {
     protected Explorer $databaseExplorer;
 
-    protected ?Structure $structure;
+    protected Structure $structure;
 
     /** Soft delete field, if empty soft delete is disabled */
     protected string $softDelete = '';
 
+    /** @var Behaviour[] */
     private array $behaviours = [];
 
     protected static string $tableName = 'unknown';
@@ -100,6 +102,9 @@ abstract class Repository
         return $this->prepareSelection($this->getTable());
     }
 
+    /**
+     * @param array<string, mixed> $by
+     */
     public function findBy(array $by): Selection
     {
         return $this->prepareSelection($this->getTable()->where($by));
@@ -120,6 +125,7 @@ abstract class Repository
     }
 
     /**
+     * @param array<string, mixed> $data
      * @throws Exception
      */
     public function insert(array $data): ?ActiveRow
@@ -146,6 +152,9 @@ abstract class Repository
         return $result instanceof NetteDatabaseActiveRow ? $this->prepareRecord($result) : $result;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function update(ActiveRow $record, array $data): ?ActiveRow
     {
         $result = $this->transaction(function () use ($record, $data) {
@@ -221,8 +230,7 @@ abstract class Repository
     }
 
     /**
-     * Define table scopes
-     * @return array
+     * @return Scope[]
      */
     protected function getScopes(): array
     {
