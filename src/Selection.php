@@ -58,7 +58,10 @@ class Selection implements Iterator, IRowContainer, ArrayAccess, Countable
             $scopeName = lcfirst(substr($name, 5));
             $scope = $this->structure->getScope($this->selection->getName(), $scopeName);
             if (!$scope) {
-                trigger_error('Scope ' . $scopeName . ' is not defined for table ' . $this->selection->getName(), E_USER_ERROR);
+                trigger_error(
+                    'Scope ' . $scopeName . ' is not defined for table ' . $this->selection->getName(),
+                    E_USER_ERROR
+                );
             }
             return $this->where(call_user_func_array($scope->getCallback(), $arguments));
         }

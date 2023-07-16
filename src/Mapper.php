@@ -23,8 +23,11 @@ class Mapper
     /**
      * Map classes and scopes by repository
      */
-    public function mapRepository(Repository $repository, ?string $activeRowClass = null, ?string $selectionClass = null): Mapper
-    {
+    public function mapRepository(
+        Repository $repository,
+        ?string $activeRowClass = null,
+        ?string $selectionClass = null
+    ): Mapper {
         $this->repositories[get_class($repository)] = $repository;
         $repository->setStructure($this->structure);
 
@@ -42,8 +45,11 @@ class Mapper
     /**
      * Map classes only by table name
      */
-    public function mapTableName(string $tableName, string $activeRowClass = null, string $selectionClass = null): Mapper
-    {
+    public function mapTableName(
+        string $tableName,
+        string $activeRowClass = null,
+        string $selectionClass = null
+    ): Mapper {
         if ($activeRowClass) {
             $this->structure->registerActiveRowClass($tableName, $activeRowClass);
         }
