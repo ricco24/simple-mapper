@@ -39,7 +39,7 @@ class TestBase extends TestCase
     /**
      * Setup before every test
      */
-    public function setUp()
+    public function setUp(): void
     {
         DatabaseConnection::refreshDatabase();
     }

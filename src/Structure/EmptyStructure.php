@@ -10,16 +10,9 @@ use SimpleMapper\Selection;
 
 class EmptyStructure implements Structure
 {
-    public function registerActiveRowClass(string $tableName, string $activeRowClass): Structure
-    {
-        return $this;
-    }
-
-    public function registerSelectionClass(string $tableName, string $selectionClass): Structure
-    {
-        return $this;
-    }
-
+    /**
+     * @param Scope[] $scopes
+     */
     public function registerScopes(string $tableName, array $scopes): Structure
     {
         return $this;
@@ -35,6 +28,9 @@ class EmptyStructure implements Structure
         return Selection::class;
     }
 
+    /**
+     * @return Scope[]
+     */
     public function getScopes(string $tableName): array
     {
         return [];

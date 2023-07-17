@@ -4,39 +4,35 @@ declare(strict_types=1);
 
 namespace SimpleMapper\Structure;
 
+use SimpleMapper\ActiveRow;
 use SimpleMapper\Exception\SimpleMapperException;
 use SimpleMapper\Scope\Scope;
+use SimpleMapper\Selection;
 
 interface Structure
 {
     /**
-     * Register new active row class for table
-     */
-    public function registerActiveRowClass(string $tableName, string $activeRowClass): Structure;
-
-    /**
-     * Register new selection class for table
-     */
-    public function registerSelectionClass(string $tableName, string $selectionClass): Structure;
-
-    /**
      * Register new scopes for table
+     * @param Scope[] $scopes
      * @throws SimpleMapperException
      */
     public function registerScopes(string $tableName, array $scopes): Structure;
 
     /**
      * Fetch row class by table
+     * @return class-string<ActiveRow>
      */
     public function getActiveRowClass(string $tableName): string;
 
     /**
      * Fetch selection class by table
+     * @return class-string<Selection>
      */
     public function getSelectionClass(string $tableName): string;
 
     /**
      * Returns all scopes registered for table
+     * @return Scope[]
      */
     public function getScopes(string $tableName): array;
 
