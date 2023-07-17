@@ -260,6 +260,9 @@ abstract class Repository
 
     /**
      * Run new transaction if no transaction is running, do nothing otherwise
+     * @template T
+     * @param callable($this): T $callback
+     * @return T
      */
     public function transaction(callable $callback): mixed
     {
