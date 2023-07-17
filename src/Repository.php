@@ -75,6 +75,7 @@ abstract class Repository
     \********************************************************************/
 
     /**
+     * @param array<int, mixed> $arguments
      * @throws RepositoryException
      */
     public function __call(string $name, array $arguments): mixed
@@ -87,7 +88,12 @@ abstract class Repository
             }
 
             $scopeNameToCall = 'scope' . ucfirst($scope->getName());
-            return call_user_func_array([$this->findAll(), $scopeNameToCall], $arguments);
+            $callback = [$this->findAll(), $scopeNameToCall];
+            if (!is_callable($callback)) {
+                throw new RepositoryException('Scope ' . $scopeName . ' is not defined for table ' . static::$tableName);
+            }
+
+            return call_user_func_array($callback, $arguments);
         }
 
         throw new RepositoryException('Call to undefined method ' . get_class($this) . '::' . $name . '()');
@@ -103,13 +109,17 @@ abstract class Repository
     }
 
     /**
-     * @param array<string, mixed> $by
+     * @param array<string|int, mixed> $by
      */
     public function findBy(array $by): Selection
     {
         return $this->prepareSelection($this->getTable()->where($by));
     }
 
+    /**
+     * @param array<string|int, mixed> $where
+     * @return array<scalar, mixed>
+     */
     public function fetchPairs(string $key = null, string $value = null, string $order = null, array $where = []): array
     {
         $result = [];
@@ -130,7 +140,7 @@ abstract class Repository
      */
     public function insert(array $data): ?ActiveRow
     {
-        $result = $this->transaction(function () use ($data) {
+        return $this->transaction(function () use ($data): ?ActiveRow {
             foreach ($this->behaviours as $behaviour) {
                 $data = $behaviour->beforeInsert($data);
             }
@@ -148,8 +158,6 @@ abstract class Repository
 
             return $record;
         });
-
-        return $result instanceof NetteDatabaseActiveRow ? $this->prepareRecord($result) : $result;
     }
 
     /**
@@ -157,7 +165,7 @@ abstract class Repository
      */
     public function update(ActiveRow $record, array $data): ?ActiveRow
     {
-        $result = $this->transaction(function () use ($record, $data) {
+        return $this->transaction(function () use ($record, $data): ?ActiveRow {
             $oldRecord = clone $record;
 
             foreach ($this->behaviours as $behaviour) {
@@ -172,8 +180,6 @@ abstract class Repository
 
             return $result ? $record : null;
         });
-
-        return $result instanceof NetteDatabaseActiveRow ? $this->prepareRecord($result) : $result;
     }
 
     public function delete(ActiveRow $record): bool
